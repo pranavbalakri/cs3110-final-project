@@ -2,4 +2,5 @@
 
 Pranav Balakrishnan - pb629 \
 Jaanvi Chirimar - jdc395 \
-Wonjin Eum - we46
+Wonjin Eum - we46 \
+Boris Chu - bc724
