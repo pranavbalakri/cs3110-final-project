@@ -25,10 +25,19 @@ let overlapping_tiles (x, y, w, h) =
   done;
   !tiles
 
-let any_solid level tiles =
-  List.exists (fun (col, row) -> is_solid (Level.get_tile level col row)) tiles
+let rects_overlap (x1, y1, w1, h1) (x2, y2, w2, h2) =
+  x1 < x2 +. w2 && x1 +. w1 > x2 && y1 < y2 +. h2 && y1 +. h1 > y2
 
-let move_player level (p : Player.t) =
+(** True if [test_bbox] collides with any solid tile OR any extra solid rect
+    (closed gates, elevator platforms). *)
+let any_solid level extra_solid tiles test_bbox =
+  List.exists (fun (col, row) -> is_solid (Level.get_tile level col row)) tiles
+  || List.exists (rects_overlap test_bbox) extra_solid
+
+(** Move player one frame with per-axis swept collision.
+    [extra_solid] is a list of (x,y,w,h) rects treated as solid
+    (closed gates, elevator platforms). *)
+let move_player level extra_solid (p : Player.t) =
   if not p.alive then ()
   else begin
     let half_w = Player.width /. 2. in
@@ -40,7 +49,8 @@ let move_player level (p : Player.t) =
       let new_x = p.pos.x +. dx in
       let test_bbox = (new_x -. half_w, p.pos.y, Player.width, Player.height) in
       let tiles = overlapping_tiles test_bbox in
-      if any_solid level tiles then p.vel <- { p.vel with Vec2.x = 0. }
+      if any_solid level extra_solid tiles test_bbox then
+        p.vel <- { p.vel with Vec2.x = 0. }
       else p.pos <- { p.pos with Vec2.x = new_x }
     done;
     let vy = p.vel.y in
@@ -51,7 +61,7 @@ let move_player level (p : Player.t) =
       let new_y = p.pos.y +. dy in
       let test_bbox = (p.pos.x -. half_w, new_y, Player.width, Player.height) in
       let tiles = overlapping_tiles test_bbox in
-      if any_solid level tiles then begin
+      if any_solid level extra_solid tiles test_bbox then begin
         if dy < 0. then p.on_ground <- true;
         p.vel <- { p.vel with Vec2.y = 0. }
       end

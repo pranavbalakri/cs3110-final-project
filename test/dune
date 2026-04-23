@@ -9,3 +9,7 @@
 (test
  (name test_physics)
  (libraries fwg ounit2))
+
+(test
+ (name test_signals)
+ (libraries fwg ounit2))

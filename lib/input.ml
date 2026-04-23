@@ -5,7 +5,13 @@ type player_input = {
   jump_pressed : bool;
 }
 
-type t = { fireboy : player_input; watergirl : player_input; reset : bool }
+type t = {
+  fireboy : player_input;
+  watergirl : player_input;
+  reset : bool;
+  interact_pressed : bool;  (** E — edge-triggered; used by levers *)
+  debug_toggle : bool;      (** F3 — toggles signal debug overlay *)
+}
 
 let poll () =
   let fireboy =
@@ -25,4 +31,6 @@ let poll () =
     }
   in
   let reset = Gfx.is_key_pressed Gfx.key_r in
-  { fireboy; watergirl; reset }
+  let interact_pressed = Gfx.is_key_pressed Gfx.key_e in
+  let debug_toggle = Gfx.is_key_pressed Gfx.key_f3 in
+  { fireboy; watergirl; reset; interact_pressed; debug_toggle }
