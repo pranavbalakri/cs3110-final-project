@@ -195,40 +195,61 @@ let entities_level =
       ]
     (String.split_on_char '\n' entities_level_str)
 
-(* ── Phase-5 demo level — crates, teleporters, ice, conveyors, fan ──
-   Legend (inline, this level only):
-     C = pushable crate spawn
-     I = ice tile
-     > = conveyor belt (rightward)
-     p = pressure button (toggles the fan at col 17)
-   Specs:
-     Teleporter: tile (4,1) ↔ tile (14,3)
-     Fan       : base (17,0), 9 tiles tall, on while button P_15_1 is held.
-*)
+(* ── Default showcase level — every tile + every overlay entity ──
+   Tile legend (see [char_to_tile]):
+     # wall        F fire         W water        G goo
+     r fireboy-door  b watergirl-door
+     ^ spikes      I ice          < / > conveyors     / \ slopes
+     f / w spawns  R / B diamonds
+     V lever       p button       C pushable crate
+   Overlay entities (specs below):
+     gate (V_3_1 ∨ P_16_1), vertical elevator,
+     teleporter pair, fan (on while lever is flipped). *)
 let phase5_level_str =
   {|####################
+#r..............b..#
+####..........######
 #..................#
-#.r..............b.#
+#.F...R......B....W#
+#.####....####..####
+#..................#
+#.........GG.......#
+#......######......#
+#./..............\.#
 #.##............##.#
-#..................#
-#..................#
-#....IIIIII........#
-#....######........#
-#..................#
-#.....>>>>>.....R..#
-#.....######.......#
-#........B.........#
-#..................#
-#.f.C.......w..p...#
+#.<<<....IIII...>>>#
+#####...#####..#####
+#f.V.C......^^..pw.#
 ####################|}
 
 let phase5_level =
   parse
+    ~gates:
+      [
+        {
+          listener_ids = [ "V_3_1"; "P_16_1" ];
+          col = 9;
+          row = 11;
+          w_tiles = 1;
+          h_tiles = 2;
+        };
+      ]
+    ~elevators:
+      [
+        {
+          col_a = 6;
+          row_a = 2;
+          col_b = 6;
+          row_b = 11;
+          w_tiles = 2;
+          speed = 50.;
+        };
+      ]
     ~teleporters:
-      [ { col_a = 4; row_a = 1; col_b = 14; row_b = 3 } ]
+      [ { col_a = 2; row_a = 8; col_b = 17; row_b = 8 } ]
     ~fans:
       [
-        { col = 17; row = 0; height_tiles = 9; listener_ids = [ "P_15_1" ] };
+        { col = 7; row = 1; height_tiles = 4; listener_ids = [ "V_3_1" ] };
       ]
     (String.split_on_char '\n' phase5_level_str)
 
