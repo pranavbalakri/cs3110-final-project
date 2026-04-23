@@ -27,6 +27,13 @@ let color_lever_inactive = Gfx.rgb 80 60 30
 let color_gate_closed = Gfx.rgba 160 80 200 220
 let color_gate_open = Gfx.rgba 160 80 200 60
 let color_elevator = Gfx.rgb 180 130 60
+let color_crate = Gfx.rgb 160 110 60
+let color_crate_outline = Gfx.rgb 80 50 20
+let color_tele_a = Gfx.rgb 180 120 255
+let color_tele_b = Gfx.rgb 120 255 200
+let color_fan_base = Gfx.rgb 80 80 100
+let color_fan_on = Gfx.rgba 180 220 255 90
+let color_fan_off = Gfx.rgba 100 100 120 50
 
 let tile_color tile =
   match tile with
@@ -127,6 +134,40 @@ let draw_elevator (e : Entities.elevator) =
   let screen_y = world_to_screen_y e.pos.y h in
   Gfx.draw_rect ~x ~y:screen_y ~w:(int_of_float e.w) ~h color_elevator
 
+let draw_crate (c : Entities.crate) =
+  let x = int_of_float c.pos.x in
+  let w = int_of_float c.w in
+  let h = int_of_float c.h in
+  let screen_y = world_to_screen_y c.pos.y h in
+  Gfx.draw_rect ~x ~y:screen_y ~w ~h color_crate;
+  Gfx.draw_rect_lines ~x ~y:screen_y ~w ~h color_crate_outline
+
+let draw_teleporter (tp : Entities.teleporter_pair) =
+  let ts = int_of_float tp.tile_w in
+  let ax = int_of_float tp.a.x in
+  let ay = world_to_screen_y tp.a.y ts in
+  let bx = int_of_float tp.b.x in
+  let by = world_to_screen_y tp.b.y ts in
+  Gfx.draw_rect ~x:ax ~y:ay ~w:ts ~h:ts (Gfx.rgba 180 120 255 70);
+  Gfx.draw_rect_lines ~x:ax ~y:ay ~w:ts ~h:ts color_tele_a;
+  Gfx.draw_rect ~x:bx ~y:by ~w:ts ~h:ts (Gfx.rgba 120 255 200 70);
+  Gfx.draw_rect_lines ~x:bx ~y:by ~w:ts ~h:ts color_tele_b
+
+let draw_fan (f : Entities.fan) =
+  let (bx, by, bw, bh) = Entities.fan_base_rect f in
+  let bx = int_of_float bx in
+  let bh = int_of_float bh in
+  let bw = int_of_float bw in
+  let base_sy = world_to_screen_y by bh in
+  Gfx.draw_rect ~x:bx ~y:base_sy ~w:bw ~h:bh color_fan_base;
+  let (cx, cy, cw, ch) = Entities.fan_column_rect f in
+  let cx = int_of_float cx in
+  let cw = int_of_float cw in
+  let ch = int_of_float ch in
+  let col_sy = world_to_screen_y cy ch in
+  let color = if f.is_on then color_fan_on else color_fan_off in
+  Gfx.draw_rect ~x:cx ~y:col_sy ~w:cw ~h:ch color
+
 (* ── Debug overlay (F3) ─────────────────────────────────────────────────── *)
 
 let draw_debug (game : Game.t) =
@@ -176,10 +217,13 @@ let draw game =
   Gfx.clear (Gfx.rgb 30 30 40);
   draw_tiles game.Game.level;
   (* Entities below players *)
+  Array.iter draw_fan game.Game.fans;
+  Array.iter draw_teleporter game.Game.teleporters;
   Array.iter draw_elevator game.Game.elevators;
   Array.iter draw_gate game.Game.gates;
   Array.iter draw_button game.Game.buttons;
   Array.iter draw_lever game.Game.levers;
+  Array.iter draw_crate game.Game.crates;
   (* Collectibles and characters *)
   Array.iter draw_diamond game.Game.diamonds;
   draw_player game.Game.fireboy;

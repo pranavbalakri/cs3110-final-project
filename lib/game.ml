@@ -7,6 +7,9 @@ type t = {
   levers : Entities.lever array;
   gates : Entities.gate array;
   elevators : Entities.elevator array;
+  crates : Entities.crate array;
+  teleporters : Entities.teleporter_pair array;
+  fans : Entities.fan array;
   signals : Signals.table;
   mutable debug : bool;
   mutable status : Types.status;
@@ -32,6 +35,15 @@ let init level =
   let elevators =
     Array.of_list (List.map Entities.elev_of_spec level.Level.elevators)
   in
+  let crates =
+    Array.of_list (List.map Entities.crate_of_spec level.Level.crates)
+  in
+  let teleporters =
+    Array.of_list (List.map Entities.tele_of_spec level.Level.teleporters)
+  in
+  let fans =
+    Array.of_list (List.map Entities.fan_of_spec level.Level.fans)
+  in
   {
     level;
     fireboy;
@@ -41,6 +53,9 @@ let init level =
     levers;
     gates;
     elevators;
+    crates;
+    teleporters;
+    fans;
     signals = Signals.create ();
     debug = false;
     status = Types.Playing;
@@ -54,6 +69,8 @@ let reset game =
   Array.iter Diamond.reset game.diamonds;
   Array.iter Entities.reset_lever game.levers;
   Array.iter Entities.reset_elevator game.elevators;
+  Array.iter Entities.reset_crate game.crates;
+  Array.iter Entities.reset_fan game.fans;
   Signals.clear game.signals;
   game.status <- Types.Playing;
   game.elapsed <- 0.;
@@ -81,10 +98,11 @@ let update game (inp : Input.t) dt =
         (* 2. Advance elevators; record frame_delta for riding *)
         Array.iter (fun e -> Entities.update_elevator e dt) game.elevators;
 
-        (* 3. Emit button signals based on player positions *)
+        (* 3. Emit button signals based on player + crate positions *)
         let players = [ game.fireboy; game.watergirl ] in
+        let crates_list = Array.to_list game.crates in
         Array.iter
-          (fun b -> Entities.update_button b players game.signals)
+          (fun b -> Entities.update_button b players crates_list game.signals)
           game.buttons;
 
         (* 4. Handle lever interact (edge-triggered) *)
@@ -96,31 +114,62 @@ let update game (inp : Input.t) dt =
         (* 5. Open/close gates based on signal snapshot *)
         Array.iter (fun g -> Entities.update_gate g game.signals) game.gates;
 
-        (* 6. Build extra-solid list: closed gates + elevator platforms *)
+        (* 6. Update fans (signal-driven) *)
+        Array.iter (fun f -> Entities.update_fan f game.signals) game.fans;
+
+        (* 7. Build extra-solid list: closed gates + elevator platforms *)
         let extra_solid =
-          Array.to_list game.gates
-          |> List.filter_map (fun (g : Entities.gate) ->
-                 if not g.is_open then Some (Entities.bbox_of_gate g) else None)
-          |> fun closed ->
-          closed
+          let closed_gates =
+            Array.to_list game.gates
+            |> List.filter_map (fun (g : Entities.gate) ->
+                   if not g.is_open then Some (Entities.bbox_of_gate g)
+                   else None)
+          in
+          closed_gates
           @ (Array.to_list game.elevators
-            |> List.map Entities.bbox_of_elevator)
+             |> List.map Entities.bbox_of_elevator)
         in
 
-        (* 7. Translate players riding elevators before physics *)
+        (* 8. Translate players riding elevators before physics *)
         List.iter (Entities.apply_elevator_riding game.elevators) players;
 
-        (* 8. Apply player input and gravity *)
+        (* 9. Compute ground surface for each player (feeds apply_input) *)
+        Physics.compute_ground_surface game.level game.fireboy;
+        Physics.compute_ground_surface game.level game.watergirl;
+
+        (* 10. Fan membership: reset, then flag for each active fan *)
+        game.fireboy.in_fan <- false;
+        game.watergirl.in_fan <- false;
+        Array.iter
+          (fun f ->
+            Entities.apply_fan_to_player f game.fireboy;
+            Entities.apply_fan_to_player f game.watergirl)
+          game.fans;
+
+        (* 11. Apply player input and gravity (gravity knows about in_fan) *)
         Player.apply_input game.fireboy inp.fireboy;
         Player.apply_input game.watergirl inp.watergirl;
         Player.apply_gravity game.fireboy;
         Player.apply_gravity game.watergirl;
 
-        (* 9. Sweep-based movement with tile + entity collision *)
-        Physics.move_player game.level extra_solid game.fireboy;
-        Physics.move_player game.level extra_solid game.watergirl;
+        (* 12. Move crates first (vertical only; horizontal is push-driven) *)
+        let crates_list = Array.to_list game.crates in
+        Array.iter
+          (fun c -> Physics.move_crate game.level extra_solid crates_list c)
+          game.crates;
 
-        (* 10. Hazards, doors, diamonds *)
+        (* 13. Sweep-based player movement with tile + entity + crate collision *)
+        let crates_list = Array.to_list game.crates in
+        Physics.move_player game.level extra_solid crates_list game.fireboy;
+        Physics.move_player game.level extra_solid crates_list game.watergirl;
+
+        (* 14. Teleporters (after movement, with per-player cooldown) *)
+        Entities.tick_teleport_cooldowns players dt;
+        Array.iter
+          (fun tp -> Entities.update_teleporter tp players)
+          game.teleporters;
+
+        (* 15. Hazards, doors, diamonds *)
         Physics.check_hazards game.level game.fireboy;
         Physics.check_hazards game.level game.watergirl;
         Physics.check_door game.level game.fireboy;
@@ -131,7 +180,7 @@ let update game (inp : Input.t) dt =
             Diamond.try_collect d game.watergirl)
           game.diamonds;
 
-        (* 11. Win / lose *)
+        (* 16. Win / lose *)
         if (not game.fireboy.alive) || not game.watergirl.alive then begin
           game.status <- Types.Lost;
           game.death_timer <- 1.0
