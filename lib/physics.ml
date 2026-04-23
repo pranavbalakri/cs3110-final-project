@@ -11,6 +11,38 @@ let is_deadly_for kind tile =
   | _, Types.Spikes -> true
   | _ -> false
 
+type ramp =
+  | Up
+  | Down
+
+let ramp_of_tile = function
+  | Types.Slope_up -> Some Up
+  | Types.Slope_down -> Some Down
+  | _ -> None
+
+let ramp_surface_y ramp ~tile_x ~tile_y ~x =
+  let ts = float_of_int Tuning.tile_size in
+  let tile_left = float_of_int (tile_x * Tuning.tile_size) in
+  let local_x = x -. tile_left in
+  if local_x < 0. || local_x > ts then None
+  else
+    let base_y = float_of_int (tile_y * Tuning.tile_size) in
+    let local_y =
+      match ramp with
+      | Up -> local_x
+      | Down -> ts -. local_x
+    in
+    Some (base_y +. local_y)
+
+let snap_bottom_to_ramp tile ~tile_x ~tile_y ~x ~bottom_y =
+  match ramp_of_tile tile with
+  | None -> None
+  | Some ramp ->
+      (match ramp_surface_y ramp ~tile_x ~tile_y ~x with
+      | None -> None
+      | Some surface_y ->
+          if bottom_y <= surface_y +. 2. then Some surface_y else None)
+
 let overlapping_tiles (x, y, w, h) =
   let ts = float_of_int Tuning.tile_size in
   let min_col = int_of_float (x /. ts) in
@@ -117,6 +149,24 @@ let move_player level extra_solid crates (p : Player.t) =
             else p.vel <- { p.vel with Vec2.x = 0. }
       end
     done;
+
+    (* Ramp snap pass after horizontal movement: keep feet on a 45-degree surface. *)
+    if p.vel.y <= 0. then begin
+      let ts = float_of_int Tuning.tile_size in
+      let foot_x = p.pos.x in
+      let tile_x = int_of_float (foot_x /. ts) in
+      let tile_y = int_of_float (p.pos.y /. ts) in
+      let tile = Level.get_tile level tile_x tile_y in
+      match
+        snap_bottom_to_ramp tile ~tile_x ~tile_y ~x:foot_x ~bottom_y:p.pos.y
+      with
+      | Some y ->
+          p.pos <- { p.pos with Vec2.y = y };
+          p.on_ground <- true;
+          if p.vel.y < 0. then p.vel <- { p.vel with Vec2.y = 0. }
+      | None -> ()
+    end;
+
     (* Vertical sweep *)
     let vy = p.vel.y in
     let steps_y = int_of_float (Float.abs vy /. step) + 1 in
@@ -130,7 +180,24 @@ let move_player level extra_solid crates (p : Player.t) =
         p.vel <- { p.vel with Vec2.y = 0. }
       end
       else p.pos <- { p.pos with Vec2.y = new_y }
-    done
+    done;
+
+    (* Final ramp snap after vertical sweep for stable down-ramp walking/falling. *)
+    if p.vel.y <= 0. then begin
+      let ts = float_of_int Tuning.tile_size in
+      let foot_x = p.pos.x in
+      let tile_x = int_of_float (foot_x /. ts) in
+      let tile_y = int_of_float (p.pos.y /. ts) in
+      let tile = Level.get_tile level tile_x tile_y in
+      match
+        snap_bottom_to_ramp tile ~tile_x ~tile_y ~x:foot_x ~bottom_y:p.pos.y
+      with
+      | Some y ->
+          p.pos <- { p.pos with Vec2.y = y };
+          p.on_ground <- true;
+          p.vel <- { p.vel with Vec2.y = 0. }
+      | None -> ()
+    end
   end
 
 (** Move a crate one frame: horizontal decay + gravity, vertical sweep only. *)
