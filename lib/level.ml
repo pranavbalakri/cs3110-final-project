@@ -207,19 +207,19 @@ let entities_level =
      teleporter pair, fan (on while lever is flipped). *)
 let phase5_level_str =
   {|####################
-#r..............b..#
+#b................r#
 ####..........######
+#...........B......#
+#.WR.....####...FFF#
+#.###..........#####
+#........GGG.......#
+#.......#####......#
 #..................#
-#.F...R......B....W#
-#.####....####..####
 #..................#
-#.........GG.......#
-#......######......#
-#./..............\.#
-#.##............##.#
-#.<<<....IIII...>>>#
-#####...#####..#####
-#f.V.C......^^..pw.#
+#..................#
+#B......IIIII.....R#
+#<<<<..........<>>>#
+#f.V....GGGGG.....w#
 ####################|}
 
 let phase5_level =
@@ -237,9 +237,9 @@ let phase5_level =
     ~elevators:
       [
         {
-          col_a = 6;
+          col_a = 5;
           row_a = 2;
-          col_b = 6;
+          col_b = 5;
           row_b = 11;
           w_tiles = 2;
           speed = 50.;
@@ -249,7 +249,7 @@ let phase5_level =
       [ { col_a = 2; row_a = 8; col_b = 17; row_b = 8 } ]
     ~fans:
       [
-        { col = 7; row = 1; height_tiles = 4; listener_ids = [ "V_3_1" ] };
+        { col = 7; row = 1; height_tiles = 6; listener_ids = [ "V_3_1" ] };
       ]
     (String.split_on_char '\n' phase5_level_str)
 

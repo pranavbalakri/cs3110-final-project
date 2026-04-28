@@ -6,3 +6,7 @@ _coverage/
 *.install
 .DS_Store
 save.json
+CODEBASE_REVIEW.md
+
+markdown.md
+PRESENTATION_SCRIPT.md
