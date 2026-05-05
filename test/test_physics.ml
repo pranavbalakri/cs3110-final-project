@@ -111,6 +111,102 @@ let test_slope_snap_on_move _ =
   assert_bool "slope snap should raise player bottom to ramp surface"
     (abs_float (p.pos.y -. 10.) < 1e-6)
 
+(* ── check_hazards ───────────────────────────────────────────────── *)
+
+(* Level with Fire at col 1, row 1 (world y=40..80, x=40..80)
+   Input rows (bottom-to-top after List.rev): row0=###, row1=#F#, row2=#.# *)
+let fire_level = Level.parse [ "#.#"; "#F#"; "###" ]
+
+let test_hazard_kills_watergirl_on_fire _ =
+  let p = Player.create Types.Watergirl { Vec2.x = 40.; y = 40. } in
+  Physics.check_hazards fire_level p;
+  assert_bool "watergirl dies on fire" (not p.alive)
+
+let test_hazard_fireboy_safe_on_fire _ =
+  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+  Physics.check_hazards fire_level p;
+  assert_bool "fireboy survives fire" p.alive
+
+(* Level with Water at col 1, row 1 *)
+let water_level = Level.parse [ "#.#"; "#W#"; "###" ]
+
+let test_hazard_kills_fireboy_on_water _ =
+  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+  Physics.check_hazards water_level p;
+  assert_bool "fireboy dies on water" (not p.alive)
+
+let test_hazard_goo_kills_anyone _ =
+  let goo_level = Level.parse [ "#.#"; "#G#"; "###" ] in
+  let fb = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+  let wg = Player.create Types.Watergirl { Vec2.x = 40.; y = 40. } in
+  Physics.check_hazards goo_level fb;
+  Physics.check_hazards goo_level wg;
+  assert_bool "fireboy dies on goo" (not fb.alive);
+  assert_bool "watergirl dies on goo" (not wg.alive)
+
+(* ── check_door ─────────────────────────────────────────────────── *)
+
+(* Level with Fireboy_door at col 1, row 1 *)
+let door_level = Level.parse [ "#.#"; "#r#"; "###" ]
+
+let test_fireboy_at_correct_door _ =
+  (* center = pos.x, pos.y + half_h = 40 + 17 = 57 → col=1, row=1 *)
+  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+  Physics.check_door door_level p;
+  assert_bool "fireboy at door" p.at_door
+
+let test_watergirl_not_at_fireboy_door _ =
+  let p = Player.create Types.Watergirl { Vec2.x = 40.; y = 40. } in
+  Physics.check_door door_level p;
+  assert_bool "watergirl not at fireboy door" (not p.at_door)
+
+(* ── compute_ground_surface ─────────────────────────────────────── *)
+
+(* Level: row0=###, row1=#I#, row2=#.# — Ice at col 1, row 1 *)
+let ice_floor_level = Level.parse [ "#.#"; "#I#"; "###" ]
+
+let test_ground_surface_ice _ =
+  (* probe_y = 80 - 1 = 79 → row 1; col 1 = Ice *)
+  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 80. } in
+  Physics.compute_ground_surface ice_floor_level p;
+  assert_equal Player.Ice p.ground_surface
+
+(* Level: row0=###, row1=#>#, row2=#.# — Conveyor_right at col 1, row 1 *)
+let conveyor_floor_level = Level.parse [ "#.#"; "#>#"; "###" ]
+
+let test_ground_surface_conveyor _ =
+  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 80. } in
+  Physics.compute_ground_surface conveyor_floor_level p;
+  assert_equal (Player.Conveyor_belt Tuning.conveyor_speed) p.ground_surface
+
+(* ── move_crate ──────────────────────────────────────────────────── *)
+
+let open_level =
+  Level.parse (String.split_on_char '\n' "######\n#....#\n#....#\n######")
+
+let test_crate_falls_under_gravity _ =
+  let c = Entities.crate_of_spec { Level.col = 2; row = 2 } in
+  let start_y = c.pos.y in
+  Physics.move_crate open_level [] [ c ] c;
+  assert_bool "crate fell" (c.pos.y < start_y)
+
+let test_crate_stops_at_floor _ =
+  let c = Entities.crate_of_spec { Level.col = 2; row = 1 } in
+  for _ = 1 to 120 do
+    Physics.move_crate open_level [] [ c ] c
+  done;
+  assert_bool "crate above floor" (c.pos.y >= 0.)
+
+(* ── move_player horizontal wall ────────────────────────────────── *)
+
+let test_player_blocked_by_wall _ =
+  let lvl = Level.parse [ "#.#" ] in
+  (* player at x=20 moving right into wall at col 2 *)
+  let p = Player.create Types.Fireboy { Vec2.x = 20.; y = 0. } in
+  p.vel <- { Vec2.x = 100.; y = 0. };
+  Physics.move_player lvl [] [] p;
+  assert_bool "player stopped by wall" (p.vel.x = 0.)
+
 let suite =
   "Physics tests"
   >::: [
@@ -123,6 +219,17 @@ let suite =
          "buffered_jump_while_falling" >:: test_buffered_jump_while_falling;
          "slope_surface_height" >:: test_slope_surface_height;
          "slope_snap_on_move" >:: test_slope_snap_on_move;
+         "hazard_kills_watergirl_on_fire" >:: test_hazard_kills_watergirl_on_fire;
+         "hazard_fireboy_safe_on_fire" >:: test_hazard_fireboy_safe_on_fire;
+         "hazard_kills_fireboy_on_water" >:: test_hazard_kills_fireboy_on_water;
+         "hazard_goo_kills_anyone" >:: test_hazard_goo_kills_anyone;
+         "fireboy_at_correct_door" >:: test_fireboy_at_correct_door;
+         "watergirl_not_at_fireboy_door" >:: test_watergirl_not_at_fireboy_door;
+         "ground_surface_ice" >:: test_ground_surface_ice;
+         "ground_surface_conveyor" >:: test_ground_surface_conveyor;
+         "crate_falls_under_gravity" >:: test_crate_falls_under_gravity;
+         "crate_stops_at_floor" >:: test_crate_stops_at_floor;
+         "player_blocked_by_wall" >:: test_player_blocked_by_wall;
        ]
 
 let () = run_test_tt_main suite

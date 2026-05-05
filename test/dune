@@ -17,3 +17,7 @@
 (test
  (name test_phase5)
  (libraries fwg ounit2))
+
+(test
+ (name test_entities)
+ (libraries fwg ounit2))
