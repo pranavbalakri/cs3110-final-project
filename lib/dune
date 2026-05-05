@@ -1,3 +1,4 @@
 (library
  (name fwg)
- (libraries raylib))
+ (libraries raylib)
+ (instrumentation (backend bisect_ppx)))
