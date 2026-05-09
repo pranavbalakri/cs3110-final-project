@@ -95,8 +95,8 @@ type level_data = {
   height : int;                        (** Grid height in tiles. *)
   grid : Types.tile array array;
       (** Tile grid indexed [grid.(row).(col)]; row 0 is the bottom row. *)
-  fireboy_spawn : Vec2.t;              (** World-space spawn position for Fireboy. *)
-  watergirl_spawn : Vec2.t;            (** World-space spawn position for Watergirl. *)
+  firecaml_spawn : Vec2.t;             (** World-space spawn position for Firecaml. *)
+  watercaml_spawn : Vec2.t;            (** World-space spawn position for Watercaml. *)
   diamonds : diamond_spec list;
   buttons : button_spec list;
   levers : lever_spec list;
@@ -118,8 +118,8 @@ type level_data = {
       {li [F] — {!Types.Fire}}
       {li [W] — {!Types.Water}}
       {li [G] — {!Types.Goo}}
-      {li [r] — {!Types.Fireboy_door}}
-      {li [b] — {!Types.Watergirl_door}}
+      {li [r] — {!Types.Firecaml_door}}
+      {li [b] — {!Types.Watercaml_door}}
       {li [^] — {!Types.Spikes}}
       {li [I] — {!Types.Ice}}
       {li [<] — {!Types.Conveyor_left}}

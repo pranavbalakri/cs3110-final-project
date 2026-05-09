@@ -9,11 +9,11 @@
 type tile =
   | Empty             (** Passable air cell. *)
   | Wall              (** Solid, impassable block. *)
-  | Fire              (** Lethal to Watergirl; harmless to Fireboy. *)
-  | Water             (** Lethal to Fireboy; harmless to Watergirl. *)
+  | Fire              (** Lethal to Watercaml; harmless to Firecaml. *)
+  | Water             (** Lethal to Firecaml; harmless to Watercaml. *)
   | Goo               (** Lethal to both players. *)
-  | Fireboy_door      (** Fireboy's exit door tile. *)
-  | Watergirl_door    (** Watergirl's exit door tile. *)
+  | Firecaml_door     (** Firecaml's exit door tile. *)
+  | Watercaml_door    (** Watercaml's exit door tile. *)
   | Ice               (** Low-friction surface: horizontal velocity decays slowly. *)
   | Conveyor_left     (** Pushes the standing entity leftward each frame. *)
   | Conveyor_right    (** Pushes the standing entity rightward each frame. *)
@@ -25,8 +25,8 @@ type tile =
 
 (** Distinguishes the two controllable characters. *)
 type player_kind =
-  | Fireboy    (** The fire character (WASD controls). *)
-  | Watergirl  (** The water character (IJKL / IJL controls). *)
+  | Firecaml   (** The fire character (WASD controls). *)
+  | Watercaml  (** The water character (IJKL controls). *)
 
 (** {1 Direction} *)
 

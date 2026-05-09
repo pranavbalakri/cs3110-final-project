@@ -50,6 +50,8 @@ type t = {
       (** True if the player is inside an active fan column this frame. *)
   mutable teleport_cooldown : float;
       (** Seconds remaining before the player can use a teleporter again. *)
+  mutable facing : Types.direction;
+      (** Horizontal direction the player is currently facing. *)
 }
 
 (** {1 Constants} *)

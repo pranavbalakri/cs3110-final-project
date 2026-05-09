@@ -25,10 +25,10 @@ type player_input = {
 
 (** Combined input for both players plus global controls. *)
 type t = {
-  fireboy : player_input;
-      (** Input for Fireboy (WASD + E). *)
-  watergirl : player_input;
-      (** Input for Watergirl (IJKL + O). *)
+  firecaml : player_input;
+      (** Input for Firecaml (WASD + E). *)
+  watercaml : player_input;
+      (** Input for Watercaml (IJKL + O). *)
   reset : bool;
       (** [true] if R was pressed this frame; triggers an immediate level reset. *)
   debug_toggle : bool;

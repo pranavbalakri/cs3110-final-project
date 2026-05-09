@@ -12,10 +12,10 @@
 type t = {
   level : Level.level_data;
       (** The loaded level (immutable tile grid + specs). *)
-  fireboy : Player.t;
-      (** Fireboy's runtime player record. *)
-  watergirl : Player.t;
-      (** Watergirl's runtime player record. *)
+  firecaml : Player.t;
+      (** Firecaml's runtime player record. *)
+  watercaml : Player.t;
+      (** Watercaml's runtime player record. *)
   diamonds : Diamond.t array;
       (** All collectible diamonds in the level. *)
   buttons : Entities.button array;

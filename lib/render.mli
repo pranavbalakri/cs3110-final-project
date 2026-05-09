@@ -8,6 +8,13 @@
     {!Gfx.end_frame}; it renders the complete scene including the HUD
     and any active overlays. *)
 
+(** {1 Initialisation} *)
+
+(** [load_textures ()] loads all sprite sheet textures from disk.
+    Must be called once after the graphics context is initialised and
+    before the first call to {!draw}. *)
+val load_textures : unit -> unit
+
 (** {1 Coordinate conversion} *)
 
 (** [world_to_screen_y world_y height] converts a world-space y coordinate
