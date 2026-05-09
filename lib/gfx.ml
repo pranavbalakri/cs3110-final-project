@@ -48,6 +48,7 @@ let key_j = R.Key.J
 let key_k = R.Key.K
 let key_l = R.Key.L
 let key_n = R.Key.N
+let key_o = R.Key.O
 let key_p = R.Key.P
 let key_q = R.Key.Q
 let key_r = R.Key.R

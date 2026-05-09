@@ -105,10 +105,16 @@ let update game (inp : Input.t) dt =
           (fun b -> Entities.update_button b players crates_list game.signals)
           game.buttons;
 
-        (* 4. Handle lever interact (edge-triggered) *)
+        (* 4. Handle lever interact (edge-triggered, per-player key) *)
+        let players_with_interact =
+          [
+            (game.fireboy, inp.fireboy.interact_pressed);
+            (game.watergirl, inp.watergirl.interact_pressed);
+          ]
+        in
         Array.iter
           (fun lv ->
-            Entities.update_lever lv players inp.interact_pressed game.signals)
+            Entities.update_lever lv players_with_interact game.signals)
           game.levers;
 
         (* 5. Open/close gates based on signal snapshot *)

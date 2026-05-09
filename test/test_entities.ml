@@ -57,7 +57,7 @@ let test_lever_toggles_on_nearby_interact _ =
   let p = player_at ts ts in
   p.alive <- true;
   assert_bool "lever starts off" (not lv.state);
-  Entities.update_lever lv [ p ] true signals;
+  Entities.update_lever lv [ (p, true) ] signals;
   assert_bool "lever on after interact" lv.state;
   assert_bool "lever signal emitted" (Signals.eval signals (Signals.Lit "lv"))
 
@@ -65,22 +65,22 @@ let test_lever_no_interact_stays_off _ =
   let lv = Entities.lever_of_spec { Level.id = "lv"; col = 1; row = 1 } in
   let signals = make_signals () in
   let p = player_at ts ts in
-  Entities.update_lever lv [ p ] false signals;
+  Entities.update_lever lv [ (p, false) ] signals;
   assert_bool "no interact = stays off" (not lv.state)
 
 let test_lever_toggle_twice_returns_off _ =
   let lv = Entities.lever_of_spec { Level.id = "lv"; col = 1; row = 1 } in
   let signals = make_signals () in
   let p = player_at ts ts in
-  Entities.update_lever lv [ p ] true signals;
-  Entities.update_lever lv [ p ] true signals;
+  Entities.update_lever lv [ (p, true) ] signals;
+  Entities.update_lever lv [ (p, true) ] signals;
   assert_bool "double toggle = off" (not lv.state)
 
 let test_lever_far_player_no_toggle _ =
   let lv = Entities.lever_of_spec { Level.id = "lv"; col = 0; row = 0 } in
   let signals = make_signals () in
   let p = player_at (ts *. 10.) (ts *. 10.) in
-  Entities.update_lever lv [ p ] true signals;
+  Entities.update_lever lv [ (p, true) ] signals;
   assert_bool "far player cannot toggle lever" (not lv.state)
 
 (* ── Gate ──────────────────────────────────────────────────────────── *)

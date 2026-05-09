@@ -57,12 +57,12 @@ let test_short_hop_vs_high_jump _ =
     p.on_ground <- true;
     let peak = ref p.pos.y in
     (* Launch frame *)
-    step_vertical p { left = false; right = false; jump = held_frames > 0; jump_pressed = true };
+    step_vertical p { left = false; right = false; jump = held_frames > 0; jump_pressed = true; interact_pressed = false };
     if p.pos.y > !peak then peak := p.pos.y;
     p.on_ground <- false;
     for i = 1 to 24 do
       let hold = i < held_frames in
-      step_vertical p { left = false; right = false; jump = hold; jump_pressed = false };
+      step_vertical p { left = false; right = false; jump = hold; jump_pressed = false; interact_pressed = false };
       if p.pos.y > !peak then peak := p.pos.y
     done;
     !peak
@@ -76,21 +76,21 @@ let test_coyote_jump_after_walking_off _ =
   let p = Player.create Types.Fireboy Vec2.zero in
   p.on_ground <- true;
   (* Prime coyote timer from a grounded frame. *)
-  Player.apply_input p { left = false; right = false; jump = false; jump_pressed = false };
+  Player.apply_input p { left = false; right = false; jump = false; jump_pressed = false; interact_pressed = false };
   p.on_ground <- false;
-  Player.apply_input p { left = false; right = false; jump = true; jump_pressed = true };
+  Player.apply_input p { left = false; right = false; jump = true; jump_pressed = true; interact_pressed = false };
   assert_bool "jump should fire during coyote window" (p.vel.y > 0.)
 
 let test_buffered_jump_while_falling _ =
   let p = Player.create Types.Fireboy Vec2.zero in
   p.on_ground <- false;
   (* Press jump while airborne: should buffer. *)
-  Player.apply_input p { left = false; right = false; jump = true; jump_pressed = true };
+  Player.apply_input p { left = false; right = false; jump = true; jump_pressed = true; interact_pressed = false };
   assert_bool "buffer should be set" (p.jump_buffer_left > 0);
   p.vel <- Vec2.zero;
   (* Simulate landing before buffer expires; buffered jump should auto-fire. *)
   p.on_ground <- true;
-  Player.apply_input p { left = false; right = false; jump = true; jump_pressed = false };
+  Player.apply_input p { left = false; right = false; jump = true; jump_pressed = false; interact_pressed = false };
   assert_bool "buffered jump should fire on ground-touch" (p.vel.y > 0.)
 
 let test_slope_surface_height _ =

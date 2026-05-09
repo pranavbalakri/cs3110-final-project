@@ -195,19 +195,17 @@ let update_button
 
 let update_lever
     (lv : lever)
-    (players : Player.t list)
-    interact_pressed
+    (players : (Player.t * bool) list)
     (signals : Signals.table) =
-  if interact_pressed then begin
-    let ts = float_of_int Tuning.tile_size in
-    let zone = (lv.pos.x -. ts /. 4., lv.pos.y, ts *. 1.5, ts *. 2.) in
-    let near =
-      List.exists
-        (fun (p : Player.t) -> p.alive && rects_overlap zone (Player.bbox p))
-        players
-    in
-    if near then lv.state <- not lv.state
-  end;
+  let ts = float_of_int Tuning.tile_size in
+  let zone = (lv.pos.x -. ts /. 4., lv.pos.y, ts *. 1.5, ts *. 2.) in
+  let toggled =
+    List.exists
+      (fun ((p : Player.t), pressed) ->
+        pressed && p.alive && rects_overlap zone (Player.bbox p))
+      players
+  in
+  if toggled then lv.state <- not lv.state;
   if lv.state then Signals.emit signals lv.id
 
 let update_gate (g : gate) (signals : Signals.table) =

@@ -68,6 +68,7 @@ val key_j : key
 val key_k : key
 val key_l : key
 val key_n : key
+val key_o : key
 val key_p : key
 val key_q : key
 val key_r : key

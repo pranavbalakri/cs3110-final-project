@@ -2,7 +2,7 @@ open OUnit2
 open Fwg
 
 let no_input : Input.player_input =
-  { left = false; right = false; jump = false; jump_pressed = false }
+  { left = false; right = false; jump = false; jump_pressed = false; interact_pressed = false }
 
 let input_left : Input.player_input = { no_input with left = true }
 
