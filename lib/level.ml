@@ -205,7 +205,7 @@ let entities_level =
    Overlay entities (specs below):
      gate (V_3_1 ∨ P_16_1), vertical elevator,
      teleporter pair, fan (on while lever is flipped). *)
-let phase5_level_str =
+let level1_str =
   {|####################
 #b................r#
 ####..........######
@@ -222,7 +222,7 @@ let phase5_level_str =
 #f.V....GGGGG.....w#
 ####################|}
 
-let phase5_level =
+let level1 =
   parse
     ~gates:
       [
@@ -251,36 +251,97 @@ let phase5_level =
       [
         { col = 7; row = 1; height_tiles = 6; listener_ids = [ "V_3_1" ] };
       ]
-    (String.split_on_char '\n' phase5_level_str)
+    (String.split_on_char '\n' level1_str)
 
-(* ── Blank placeholder level (used by Levels 2 and 3 in the menu) ── *)
+(* ── Level 2: "Button Cooperation" — each player's button opens the other's
+   gate. A central elevator ferries them up to the door tier. ── *)
 
-let blank_level_str =
+let level2_str =
   {|####################
-#..................#
-#..................#
-#.r..............b.#
+#r................b#
 #.##............##.#
+#........##........#
 #..................#
+#......WWWWWW......#
+#......######......#
+#........R.........#
+#......######......#
+#......FFFFFF......#
 #..................#
-#..................#
-#..................#
-#..................#
-#..................#
-#..................#
-#..................#
-#.f..............w.#
+#........B.........#
+#...##........##...#
+#.f.p............pw#
 ####################|}
 
-let blank_level = parse (String.split_on_char '\n' blank_level_str)
+let level2 =
+  parse
+    ~gates:
+      [
+        {
+          listener_ids = [ "P_17_1" ];
+          col = 1;
+          row = 13;
+          w_tiles = 1;
+          h_tiles = 1;
+        };
+        {
+          listener_ids = [ "P_4_1" ];
+          col = 18;
+          row = 13;
+          w_tiles = 1;
+          h_tiles = 1;
+        };
+      ]
+    ~elevators:
+      [
+        {
+          col_a = 9;
+          row_a = 1;
+          col_b = 9;
+          row_b = 6;
+          w_tiles = 2;
+          speed = 60.;
+        };
+      ]
+    (String.split_on_char '\n' level2_str)
+
+(* ── Level 3: "Lever & Teleport" — a lever toggles a fan that lifts the
+   players over the goo pit; a teleporter pair shortcuts the upper ledges. ── *)
+
+let level3_str =
+  {|####################
+#b................r#
+######........######
+#..................#
+#..................#
+#..................#
+#........R.........#
+#......######......#
+#........B.........#
+#..................#
+#..................#
+#..................#
+#..GGGGGGGGGGGGGG..#
+#.fV............w.#
+####################|}
+
+let level3 =
+  parse
+    ~fans:
+      [
+        { col = 9; row = 1; height_tiles = 11; listener_ids = [ "V_2_1" ] };
+      ]
+    ~teleporters:
+      [ { col_a = 2; row_a = 11; col_b = 17; row_b = 11 } ]
+    (String.split_on_char '\n' level3_str)
 
 (** All playable levels in display order. The level-select menu indexes into
     this array by cursor position. *)
 let levels : (string * level_data) array =
   [|
-    ("Level 1", phase5_level);
-    ("Level 2", blank_level);
-    ("Level 3", blank_level);
+    ("Level 1", level1);
+    ("Level 2", level2);
+    ("Level 3", level3);
   |]
 
 let get_tile level col row =
