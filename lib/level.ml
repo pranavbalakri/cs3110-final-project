@@ -253,6 +253,36 @@ let phase5_level =
       ]
     (String.split_on_char '\n' phase5_level_str)
 
+(* ── Blank placeholder level (used by Levels 2 and 3 in the menu) ── *)
+
+let blank_level_str =
+  {|####################
+#..................#
+#..................#
+#.r..............b.#
+#.##............##.#
+#..................#
+#..................#
+#..................#
+#..................#
+#..................#
+#..................#
+#..................#
+#..................#
+#.f..............w.#
+####################|}
+
+let blank_level = parse (String.split_on_char '\n' blank_level_str)
+
+(** All playable levels in display order. The level-select menu indexes into
+    this array by cursor position. *)
+let levels : (string * level_data) array =
+  [|
+    ("Level 1", phase5_level);
+    ("Level 2", blank_level);
+    ("Level 3", blank_level);
+  |]
+
 let get_tile level col row =
   if col < 0 || col >= level.width || row < 0 || row >= level.height then
     Types.Wall
