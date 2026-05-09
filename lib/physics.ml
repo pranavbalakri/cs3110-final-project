@@ -64,7 +64,7 @@ let any_solid level extra_solid tiles test_bbox =
   List.exists (fun (col, row) -> is_solid (Level.get_tile level col row)) tiles
   || List.exists (rects_overlap test_bbox) extra_solid
 
-(** True if [test_bbox] is blocked by a tile / gate-elevator / other crate. *)
+(* True if [test_bbox] is blocked by a tile / gate-elevator / other crate. *)
 let bbox_blocked level extra_solid crates ?(ignore_crate = None) test_bbox =
   let tiles = overlapping_tiles test_bbox in
   any_solid level extra_solid tiles test_bbox
@@ -76,7 +76,7 @@ let bbox_blocked level extra_solid crates ?(ignore_crate = None) test_bbox =
          && rects_overlap test_bbox (Entities.bbox_of_crate c))
        crates
 
-(** Try to shove crate [c] horizontally by [dx]. Mutates [c] on success. *)
+(* Try to shove crate [c] horizontally by [dx]. Mutates [c] on success. *)
 let try_push_crate level extra_solid crates (c : Entities.crate) dx =
   let new_x = c.pos.x +. dx in
   let test_bbox = (new_x, c.pos.y, c.w, c.h) in
@@ -87,8 +87,8 @@ let try_push_crate level extra_solid crates (c : Entities.crate) dx =
     true
   end
 
-(** Determine the ground surface under [p]'s feet (1 px below bbox bottom).
-    Conveyor beats ice beats normal when feet straddle tiles. *)
+(* Determine the ground surface under [p]'s feet (1 px below bbox bottom).
+   Conveyor beats ice beats normal when feet straddle tiles. *)
 let compute_ground_surface level (p : Player.t) =
   let (x, y, w, _) = Player.bbox p in
   let ts = float_of_int Tuning.tile_size in
@@ -115,10 +115,10 @@ let compute_ground_surface level (p : Player.t) =
        | None -> if !found_ice then Player.Ice else Player.Normal)
   end
 
-(** Move player one frame with per-axis swept collision.
-    Tiles and [extra_solid] (gates + elevators) are hard walls.
-    Crates are hard walls vertically, but horizontally we attempt to push
-    a single crate out of the way before blocking. *)
+(* Move player one frame with per-axis swept collision.
+   Tiles and [extra_solid] (gates + elevators) are hard walls.
+   Crates are hard walls vertically, but horizontally we attempt to push
+   a single crate out of the way before blocking. *)
 let move_player level extra_solid crates (p : Player.t) =
   if not p.alive then ()
   else begin
@@ -200,7 +200,7 @@ let move_player level extra_solid crates (p : Player.t) =
     end
   end
 
-(** Move a crate one frame: horizontal decay + gravity, vertical sweep only. *)
+(* Move a crate one frame: horizontal decay + gravity, vertical sweep only. *)
 let move_crate level extra_solid crates (c : Entities.crate) =
   c.vel <- { c.vel with Vec2.x = c.vel.x *. Tuning.crate_friction };
   let new_vy = c.vel.y -. Tuning.gravity in

@@ -1,12 +1,12 @@
 type diamond_spec = { kind : Types.player_kind; col : int; row : int }
 
-(** Button: emits [id] each frame while any player AABB overlaps. *)
+(* Button: emits [id] each frame while any player AABB overlaps. *)
 type button_spec = { id : string; col : int; row : int }
 
-(** Lever: toggles [id] on interact; one 'p' char per cell. *)
+(* Lever: toggles [id] on interact; one 'p' char per cell. *)
 type lever_spec = { id : string; col : int; row : int }
 
-(** Gate: blocks movement unless [listener_ids] (interpreted as Any) is satisfied. *)
+(* Gate: blocks movement unless [listener_ids] (interpreted as Any) is satisfied. *)
 type gate_spec = {
   listener_ids : Types.signal_id list;
   col : int;
@@ -15,7 +15,7 @@ type gate_spec = {
   h_tiles : int;
 }
 
-(** Elevator: moves between (col_a,row_a) and (col_b,row_b) at [speed] px/s. *)
+(* Elevator: moves between (col_a,row_a) and (col_b,row_b) at [speed] px/s. *)
 type elev_spec = {
   col_a : int;
   row_a : int;
@@ -25,14 +25,14 @@ type elev_spec = {
   speed : float;
 }
 
-(** Pushable crate (Phase 5); spawned at tile (col,row). *)
+(* Pushable crate (Phase 5); spawned at tile (col,row). *)
 type crate_spec = { col : int; row : int }
 
-(** Teleporter pair (Phase 5); linked tile pair at (col_a,row_a) ↔ (col_b,row_b). *)
+(* Teleporter pair (Phase 5); linked tile pair at (col_a,row_a) ↔ (col_b,row_b). *)
 type tele_spec = { col_a : int; row_a : int; col_b : int; row_b : int }
 
-(** Fan (Phase 5); base at tile (col,row), column rises [height_tiles] above it,
-    active while [listener_ids] (interpreted as Any; empty = always) is satisfied. *)
+(* Fan (Phase 5); base at tile (col,row), column rises [height_tiles] above it,
+   active while [listener_ids] (interpreted as Any; empty = always) is satisfied. *)
 type fan_spec = {
   col : int;
   row : int;
@@ -339,8 +339,8 @@ let level3 =
     (String.split_on_char '\n' level3_str)
 
 
-(** All playable levels in display order. The level-select menu indexes into
-    this array by cursor position. *)
+(* All playable levels in display order. The level-select menu indexes into
+   this array by cursor position. *)
 let levels : (string * level_data) array =
   [|
     ("Level 1", level1);

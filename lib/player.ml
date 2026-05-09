@@ -1,9 +1,9 @@
-(** Ground-surface under the player's feet this frame.
-    Drives horizontal friction/carry behaviour in [apply_input]. *)
+(* Ground-surface under the player's feet this frame.
+   Drives horizontal friction/carry behaviour in [apply_input]. *)
 type ground_surface =
   | Normal
   | Ice
-  | Conveyor_belt of float  (** Signed horizontal velocity added per frame. *)
+  | Conveyor_belt of float  (* Signed horizontal velocity added per frame. *)
 
 type t = {
   kind : Types.player_kind;

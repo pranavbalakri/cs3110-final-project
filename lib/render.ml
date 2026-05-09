@@ -19,9 +19,9 @@ let color_dead = Gfx.rgb 100 100 100
 let color_diamond_red = Gfx.rgb 255 60 60
 let color_diamond_blue = Gfx.rgb 60 60 255
 
-(** A loaded sprite with the source-rect crop of its non-transparent
-    pixels — letting [draw_player] anchor the camel's feet to the bbox
-    floor instead of the padded-image floor. *)
+(* A loaded sprite with the source-rect crop of its non-transparent
+   pixels — letting [draw_player] anchor the camel's feet to the bbox
+   floor instead of the padded-image floor. *)
 type sprite = {
   tex : Gfx.texture;
   src_x : int;
@@ -81,9 +81,9 @@ let tile_color tile =
   | Types.Conveyor_left | Types.Conveyor_right -> Some color_conveyor
   | Types.Slope_up | Types.Slope_down -> Some color_wall
 
-(** Draw three chevrons across a conveyor tile pointing in [dir]
-    (1 = right, -1 = left). [(x, y)] is the screen-space top-left of the
-    tile. *)
+(* Draw three chevrons across a conveyor tile pointing in [dir]
+   (1 = right, -1 = left). [(x, y)] is the screen-space top-left of the
+   tile. *)
 let draw_conveyor_chevrons ~x ~y ~dir =
   let ts = Tuning.tile_size in
   let mid = y + (ts / 2) in

@@ -3,14 +3,14 @@ type player_input = {
   right : bool;
   jump : bool;
   jump_pressed : bool;
-  interact_pressed : bool;  (** edge-triggered; used by levers *)
+  interact_pressed : bool;  (* edge-triggered; used by levers *)
 }
 
 type t = {
   firecaml : player_input;
   watercaml : player_input;
   reset : bool;
-  debug_toggle : bool;      (** F3 — toggles signal debug overlay *)
+  debug_toggle : bool;      (* F3 — toggles signal debug overlay *)
 }
 
 let poll () =

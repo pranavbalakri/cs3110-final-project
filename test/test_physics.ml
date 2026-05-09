@@ -1,6 +1,11 @@
 open OUnit2
 open Fwg
 
+let ground_surface_to_string = function
+  | Player.Normal -> "Normal"
+  | Player.Ice -> "Ice"
+  | Player.Conveyor_belt v -> Printf.sprintf "Conveyor_belt(%g)" v
+
 let test_is_solid _ =
   assert_bool "Wall is solid" (Physics.is_solid Types.Wall);
   assert_bool "Ice is solid" (Physics.is_solid Types.Ice);
@@ -37,10 +42,10 @@ let test_is_deadly_watercaml _ =
 
 let test_overlapping_tiles _ =
   let tiles = Physics.overlapping_tiles (0., 0., 40., 40.) in
-  assert_equal 1 (List.length tiles);
+  assert_equal ~printer:string_of_int 1 (List.length tiles);
   assert_bool "contains (0,0)" (List.mem (0, 0) tiles);
   let tiles2 = Physics.overlapping_tiles (20., 20., 40., 40.) in
-  assert_equal 4 (List.length tiles2);
+  assert_equal ~printer:string_of_int 4 (List.length tiles2);
   assert_bool "contains (0,0)" (List.mem (0, 0) tiles2);
   assert_bool "contains (1,0)" (List.mem (1, 0) tiles2);
   assert_bool "contains (0,1)" (List.mem (0, 1) tiles2);
@@ -169,7 +174,7 @@ let test_ground_surface_ice _ =
   (* probe_y = 80 - 1 = 79 → row 1; col 1 = Ice *)
   let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 80. } in
   Physics.compute_ground_surface ice_floor_level p;
-  assert_equal Player.Ice p.ground_surface
+  assert_equal ~printer:ground_surface_to_string Player.Ice p.ground_surface
 
 (* Level: row0=###, row1=#>#, row2=#.# — Conveyor_right at col 1, row 1 *)
 let conveyor_floor_level = Level.parse [ "#.#"; "#>#"; "###" ]
@@ -177,7 +182,7 @@ let conveyor_floor_level = Level.parse [ "#.#"; "#>#"; "###" ]
 let test_ground_surface_conveyor _ =
   let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 80. } in
   Physics.compute_ground_surface conveyor_floor_level p;
-  assert_equal (Player.Conveyor_belt Tuning.conveyor_speed) p.ground_surface
+  assert_equal ~printer:ground_surface_to_string (Player.Conveyor_belt Tuning.conveyor_speed) p.ground_surface
 
 (* ── move_crate ──────────────────────────────────────────────────── *)
 

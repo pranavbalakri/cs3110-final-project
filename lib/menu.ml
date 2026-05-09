@@ -1,6 +1,6 @@
-(** Level-select menu. Owns a cursor index into [Level.levels];
-    [draw] renders the menu screen and the navigation/selection helpers
-    move the cursor or report the selection. *)
+(* Level-select menu. Owns a cursor index into [Level.levels];
+   [draw] renders the menu screen and the navigation/selection helpers
+   move the cursor or report the selection. *)
 
 type t = { mutable cursor : int }
 
@@ -8,17 +8,17 @@ let create () = { cursor = 0 }
 
 let num_levels = Array.length Level.levels
 
-(** Move cursor up; clamps at the top entry. *)
+(* Move cursor up; clamps at the top entry. *)
 let move_up (m : t) = if m.cursor > 0 then m.cursor <- m.cursor - 1
 
-(** Move cursor down; clamps at the last entry. *)
+(* Move cursor down; clamps at the last entry. *)
 let move_down (m : t) =
   if m.cursor < num_levels - 1 then m.cursor <- m.cursor + 1
 
-(** Currently highlighted level data. *)
+(* Currently highlighted level data. *)
 let selected_level (m : t) = snd Level.levels.(m.cursor)
 
-(** Render the menu to the current frame. *)
+(* Render the menu to the current frame. *)
 let draw (m : t) =
   Gfx.clear (Gfx.rgb 20 20 30);
   Gfx.draw_text "Firecaml & Watercaml" ~x:200 ~y:80 ~size:36

@@ -1,24 +1,24 @@
-(** Runtime entity state for Phase 4 interactables + Phase 5 world elements. *)
+(* Runtime entity state for Phase 4 interactables + Phase 5 world elements. *)
 
 (* ── Types ─────────────────────────────────────────────────────────────── *)
 
-(** Pressure-plate button: emits [id] each frame while any player overlaps. *)
+(* Pressure-plate button: emits [id] each frame while any player overlaps. *)
 type button = {
   id : Types.signal_id;
-  pos : Vec2.t;   (** bottom-left, world coords *)
+  pos : Vec2.t;   (* bottom-left, world coords *)
   w : float;
   h : float;
   mutable pressed : bool;
 }
 
-(** Lever: edge-triggered toggle that holds [id] high while [state = true]. *)
+(* Lever: edge-triggered toggle that holds [id] high while [state = true]. *)
 type lever = {
   id : Types.signal_id;
   pos : Vec2.t;
   mutable state : bool;
 }
 
-(** Gate: solid rectangle; passable (open) when [listener] evaluates true. *)
+(* Gate: solid rectangle; passable (open) when [listener] evaluates true. *)
 type gate = {
   listener : Signals.expr;
   pos : Vec2.t;
@@ -27,19 +27,19 @@ type gate = {
   mutable is_open : bool;
 }
 
-(** Elevator: solid platform that shuttles between [point_a] and [point_b]. *)
+(* Elevator: solid platform that shuttles between [point_a] and [point_b]. *)
 type elevator = {
   mutable pos : Vec2.t;
   w : float;
-  h : float;      (** platform thickness *)
+  h : float;      (* platform thickness *)
   point_a : Vec2.t;
   point_b : Vec2.t;
-  speed : float;  (** pixels / second *)
+  speed : float;  (* pixels / second *)
   mutable going_to_b : bool;
   mutable frame_delta : Vec2.t;
 }
 
-(** Pushable crate: gravity-subject, rigid, one-level pushing. *)
+(* Pushable crate: gravity-subject, rigid, one-level pushing. *)
 type crate = {
   mutable pos : Vec2.t;
   mutable vel : Vec2.t;
@@ -48,15 +48,15 @@ type crate = {
   spawn : Vec2.t;
 }
 
-(** Teleporter pair: entering tile [a] relocates entity to tile [b] (and v.v.). *)
+(* Teleporter pair: entering tile [a] relocates entity to tile [b] (and v.v.). *)
 type teleporter_pair = {
-  a : Vec2.t;       (** tile bottom-left *)
+  a : Vec2.t;       (* tile bottom-left *)
   b : Vec2.t;
   tile_w : float;
   tile_h : float;
 }
 
-(** Fan: upward column rising above a base tile while [listener] is true. *)
+(* Fan: upward column rising above a base tile while [listener] is true. *)
 type fan = {
   listener : Signals.expr;
   col : int;
@@ -174,7 +174,7 @@ let rects_overlap (x1, y1, w1, h1) (x2, y2, w2, h2) =
 
 (* ── Per-frame update functions ─────────────────────────────────────────── *)
 
-(** Emit button's signal if any alive player or crate overlaps it. *)
+(* Emit button's signal if any alive player or crate overlaps it. *)
 let update_button
     (b : button)
     (players : Player.t list)
@@ -246,7 +246,7 @@ let apply_elevator_riding (elevators : elevator array) (p : Player.t) =
           p.pos <- Vec2.add p.pos e.frame_delta)
       elevators
 
-(** Advance all per-player teleport cooldowns by [dt]. *)
+(* Advance all per-player teleport cooldowns by [dt]. *)
 let tick_teleport_cooldowns (players : Player.t list) dt =
   List.iter
     (fun (p : Player.t) ->
@@ -254,8 +254,8 @@ let tick_teleport_cooldowns (players : Player.t list) dt =
         p.teleport_cooldown <- Float.max 0. (p.teleport_cooldown -. dt))
     players
 
-(** Relocate the player's bbox so its centre ends up in the middle of tile
-    [(tx, ty)] (where [tx,ty] is the tile's bottom-left corner). *)
+(* Relocate the player's bbox so its centre ends up in the middle of tile
+   [(tx, ty)] (where [tx,ty] is the tile's bottom-left corner). *)
 let teleport_player_to (p : Player.t) (dest : Vec2.t) (tile_w : float) =
   p.pos <- { Vec2.x = dest.x +. (tile_w /. 2.); y = dest.y +. 2. };
   p.teleport_cooldown <- Tuning.teleport_cooldown
@@ -275,7 +275,7 @@ let update_teleporter (tp : teleporter_pair) (players : Player.t list) =
 let update_fan (f : fan) (signals : Signals.table) =
   f.is_on <- Signals.eval signals f.listener
 
-(** If [f] is on and [p] overlaps its column, mark [p.in_fan]. *)
+(* If [f] is on and [p] overlaps its column, mark [p.in_fan]. *)
 let apply_fan_to_player (f : fan) (p : Player.t) =
   if (not p.alive) || not f.is_on then ()
   else if rects_overlap (fan_column_rect f) (Player.bbox p) then
