@@ -19,6 +19,7 @@ type t = {
   mutable ground_surface : ground_surface;
   mutable in_fan : bool;
   mutable teleport_cooldown : float;
+  mutable facing : Types.direction;
 }
 
 let create kind spawn_pos =
@@ -36,6 +37,7 @@ let create kind spawn_pos =
     ground_surface = Normal;
     in_fan = false;
     teleport_cooldown = 0.;
+    facing = Types.Right;
   }
 
 let width = float_of_int Tuning.player_w
@@ -63,6 +65,8 @@ let apply_input p (inp : Input.player_input) =
     else p.jump_buffer_left <- dec_to_zero p.jump_buffer_left;
 
     let has_input = inp.left || inp.right in
+    if inp.left && not inp.right then p.facing <- Types.Left
+    else if inp.right && not inp.left then p.facing <- Types.Right;
     let input_x =
       (if inp.left then -.Tuning.walk_speed else 0.)
       +. if inp.right then Tuning.walk_speed else 0.
@@ -123,4 +127,5 @@ let reset p spawn_pos =
   p.diamonds <- 0;
   p.ground_surface <- Normal;
   p.in_fan <- false;
-  p.teleport_cooldown <- 0.
+  p.teleport_cooldown <- 0.;
+  p.facing <- Types.Right

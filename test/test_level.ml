@@ -41,27 +41,27 @@ let test_parse_goo _ =
 
 let test_parse_doors _ =
   let level = Level.test_level in
-  assert_equal Types.Fireboy_door (Level.get_tile level 3 11);
-  assert_equal Types.Watergirl_door (Level.get_tile level 15 11)
+  assert_equal Types.Firecaml_door (Level.get_tile level 3 11);
+  assert_equal Types.Watercaml_door (Level.get_tile level 15 11)
 
 let test_spawn_positions _ =
   let level = Level.test_level in
-  let fb_spawn = level.fireboy_spawn in
-  let wg_spawn = level.watergirl_spawn in
-  assert_bool "fireboy spawn x > 0" (fb_spawn.x > 0.);
-  assert_bool "fireboy spawn y > 0" (fb_spawn.y > 0.);
-  assert_bool "watergirl spawn x > 0" (wg_spawn.x > 0.);
-  assert_bool "watergirl spawn y > 0" (wg_spawn.y > 0.);
+  let fb_spawn = level.firecaml_spawn in
+  let wg_spawn = level.watercaml_spawn in
+  assert_bool "firecaml spawn x > 0" (fb_spawn.x > 0.);
+  assert_bool "firecaml spawn y > 0" (fb_spawn.y > 0.);
+  assert_bool "watercaml spawn x > 0" (wg_spawn.x > 0.);
+  assert_bool "watercaml spawn y > 0" (wg_spawn.y > 0.);
   assert_bool "spawns are different" (fb_spawn.x <> wg_spawn.x)
 
 let test_diamonds _ =
   let level = Level.test_level in
   assert_equal 2 (List.length level.diamonds);
   let red_diamonds =
-    List.filter (fun d -> d.Level.kind = Types.Fireboy) level.diamonds
+    List.filter (fun d -> d.Level.kind = Types.Firecaml) level.diamonds
   in
   let blue_diamonds =
-    List.filter (fun d -> d.Level.kind = Types.Watergirl) level.diamonds
+    List.filter (fun d -> d.Level.kind = Types.Watercaml) level.diamonds
   in
   assert_equal 1 (List.length red_diamonds);
   assert_equal 1 (List.length blue_diamonds)

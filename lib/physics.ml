@@ -5,8 +5,8 @@ let is_solid tile =
 
 let is_deadly_for kind tile =
   match (kind, tile) with
-  | Types.Fireboy, Types.Water -> true
-  | Types.Watergirl, Types.Fire -> true
+  | Types.Firecaml, Types.Water -> true
+  | Types.Watercaml, Types.Fire -> true
   | _, Types.Goo -> true
   | _, Types.Spikes -> true
   | _ -> false
@@ -241,8 +241,8 @@ let check_door level (p : Player.t) =
     let tile = Level.get_tile level col row in
     let at_correct_door =
       match (p.kind, tile) with
-      | Types.Fireboy, Types.Fireboy_door -> true
-      | Types.Watergirl, Types.Watergirl_door -> true
+      | Types.Firecaml, Types.Firecaml_door -> true
+      | Types.Watercaml, Types.Watercaml_door -> true
       | _ -> false
     in
     p.at_door <- at_correct_door

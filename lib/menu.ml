@@ -21,7 +21,7 @@ let selected_level (m : t) = snd Level.levels.(m.cursor)
 (** Render the menu to the current frame. *)
 let draw (m : t) =
   Gfx.clear (Gfx.rgb 20 20 30);
-  Gfx.draw_text "Fireboy & Watergirl" ~x:200 ~y:80 ~size:36
+  Gfx.draw_text "Firecaml & Watercaml" ~x:200 ~y:80 ~size:36
     (Gfx.rgb 230 200 100);
   Gfx.draw_text "Select a level" ~x:300 ~y:140 ~size:20
     (Gfx.rgb 200 200 200);

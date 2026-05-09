@@ -11,29 +11,29 @@ let test_is_solid _ =
   assert_bool "Water is not solid" (not (Physics.is_solid Types.Water));
   assert_bool "Goo is not solid" (not (Physics.is_solid Types.Goo))
 
-let test_is_deadly_fireboy _ =
-  assert_bool "Water deadly for Fireboy"
-    (Physics.is_deadly_for Types.Fireboy Types.Water);
-  assert_bool "Fire not deadly for Fireboy"
-    (not (Physics.is_deadly_for Types.Fireboy Types.Fire));
-  assert_bool "Goo deadly for Fireboy"
-    (Physics.is_deadly_for Types.Fireboy Types.Goo);
-  assert_bool "Spikes deadly for Fireboy"
-    (Physics.is_deadly_for Types.Fireboy Types.Spikes);
-  assert_bool "Wall not deadly for Fireboy"
-    (not (Physics.is_deadly_for Types.Fireboy Types.Wall))
+let test_is_deadly_firecaml _ =
+  assert_bool "Water deadly for Firecaml"
+    (Physics.is_deadly_for Types.Firecaml Types.Water);
+  assert_bool "Fire not deadly for Firecaml"
+    (not (Physics.is_deadly_for Types.Firecaml Types.Fire));
+  assert_bool "Goo deadly for Firecaml"
+    (Physics.is_deadly_for Types.Firecaml Types.Goo);
+  assert_bool "Spikes deadly for Firecaml"
+    (Physics.is_deadly_for Types.Firecaml Types.Spikes);
+  assert_bool "Wall not deadly for Firecaml"
+    (not (Physics.is_deadly_for Types.Firecaml Types.Wall))
 
-let test_is_deadly_watergirl _ =
-  assert_bool "Fire deadly for Watergirl"
-    (Physics.is_deadly_for Types.Watergirl Types.Fire);
-  assert_bool "Water not deadly for Watergirl"
-    (not (Physics.is_deadly_for Types.Watergirl Types.Water));
-  assert_bool "Goo deadly for Watergirl"
-    (Physics.is_deadly_for Types.Watergirl Types.Goo);
-  assert_bool "Spikes deadly for Watergirl"
-    (Physics.is_deadly_for Types.Watergirl Types.Spikes);
-  assert_bool "Wall not deadly for Watergirl"
-    (not (Physics.is_deadly_for Types.Watergirl Types.Wall))
+let test_is_deadly_watercaml _ =
+  assert_bool "Fire deadly for Watercaml"
+    (Physics.is_deadly_for Types.Watercaml Types.Fire);
+  assert_bool "Water not deadly for Watercaml"
+    (not (Physics.is_deadly_for Types.Watercaml Types.Water));
+  assert_bool "Goo deadly for Watercaml"
+    (Physics.is_deadly_for Types.Watercaml Types.Goo);
+  assert_bool "Spikes deadly for Watercaml"
+    (Physics.is_deadly_for Types.Watercaml Types.Spikes);
+  assert_bool "Wall not deadly for Watercaml"
+    (not (Physics.is_deadly_for Types.Watercaml Types.Wall))
 
 let test_overlapping_tiles _ =
   let tiles = Physics.overlapping_tiles (0., 0., 40., 40.) in
@@ -53,7 +53,7 @@ let step_vertical (p : Player.t) (inp : Input.player_input) =
 
 let test_short_hop_vs_high_jump _ =
   let run held_frames =
-    let p = Player.create Types.Fireboy Vec2.zero in
+    let p = Player.create Types.Firecaml Vec2.zero in
     p.on_ground <- true;
     let peak = ref p.pos.y in
     (* Launch frame *)
@@ -73,7 +73,7 @@ let test_short_hop_vs_high_jump _ =
     (high_peak > short_peak +. 4.)
 
 let test_coyote_jump_after_walking_off _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.on_ground <- true;
   (* Prime coyote timer from a grounded frame. *)
   Player.apply_input p { left = false; right = false; jump = false; jump_pressed = false; interact_pressed = false };
@@ -82,7 +82,7 @@ let test_coyote_jump_after_walking_off _ =
   assert_bool "jump should fire during coyote window" (p.vel.y > 0.)
 
 let test_buffered_jump_while_falling _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.on_ground <- false;
   (* Press jump while airborne: should buffer. *)
   Player.apply_input p { left = false; right = false; jump = true; jump_pressed = true; interact_pressed = false };
@@ -104,7 +104,7 @@ let test_slope_surface_height _ =
 
 let test_slope_snap_on_move _ =
   let lvl = Level.parse [ "/." ] in
-  let p = Player.create Types.Fireboy { Vec2.x = 10.; y = 0. } in
+  let p = Player.create Types.Firecaml { Vec2.x = 10.; y = 0. } in
   p.on_ground <- true;
   p.vel <- { Vec2.x = 0.; y = 0. };
   Physics.move_player lvl [] [] p;
@@ -117,48 +117,48 @@ let test_slope_snap_on_move _ =
    Input rows (bottom-to-top after List.rev): row0=###, row1=#F#, row2=#.# *)
 let fire_level = Level.parse [ "#.#"; "#F#"; "###" ]
 
-let test_hazard_kills_watergirl_on_fire _ =
-  let p = Player.create Types.Watergirl { Vec2.x = 40.; y = 40. } in
+let test_hazard_kills_watercaml_on_fire _ =
+  let p = Player.create Types.Watercaml { Vec2.x = 40.; y = 40. } in
   Physics.check_hazards fire_level p;
-  assert_bool "watergirl dies on fire" (not p.alive)
+  assert_bool "watercaml dies on fire" (not p.alive)
 
-let test_hazard_fireboy_safe_on_fire _ =
-  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+let test_hazard_firecaml_safe_on_fire _ =
+  let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 40. } in
   Physics.check_hazards fire_level p;
-  assert_bool "fireboy survives fire" p.alive
+  assert_bool "firecaml survives fire" p.alive
 
 (* Level with Water at col 1, row 1 *)
 let water_level = Level.parse [ "#.#"; "#W#"; "###" ]
 
-let test_hazard_kills_fireboy_on_water _ =
-  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+let test_hazard_kills_firecaml_on_water _ =
+  let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 40. } in
   Physics.check_hazards water_level p;
-  assert_bool "fireboy dies on water" (not p.alive)
+  assert_bool "firecaml dies on water" (not p.alive)
 
 let test_hazard_goo_kills_anyone _ =
   let goo_level = Level.parse [ "#.#"; "#G#"; "###" ] in
-  let fb = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
-  let wg = Player.create Types.Watergirl { Vec2.x = 40.; y = 40. } in
+  let fb = Player.create Types.Firecaml { Vec2.x = 40.; y = 40. } in
+  let wg = Player.create Types.Watercaml { Vec2.x = 40.; y = 40. } in
   Physics.check_hazards goo_level fb;
   Physics.check_hazards goo_level wg;
-  assert_bool "fireboy dies on goo" (not fb.alive);
-  assert_bool "watergirl dies on goo" (not wg.alive)
+  assert_bool "firecaml dies on goo" (not fb.alive);
+  assert_bool "watercaml dies on goo" (not wg.alive)
 
 (* ── check_door ─────────────────────────────────────────────────── *)
 
-(* Level with Fireboy_door at col 1, row 1 *)
+(* Level with Firecaml_door at col 1, row 1 *)
 let door_level = Level.parse [ "#.#"; "#r#"; "###" ]
 
-let test_fireboy_at_correct_door _ =
+let test_firecaml_at_correct_door _ =
   (* center = pos.x, pos.y + half_h = 40 + 17 = 57 → col=1, row=1 *)
-  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 40. } in
+  let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 40. } in
   Physics.check_door door_level p;
-  assert_bool "fireboy at door" p.at_door
+  assert_bool "firecaml at door" p.at_door
 
-let test_watergirl_not_at_fireboy_door _ =
-  let p = Player.create Types.Watergirl { Vec2.x = 40.; y = 40. } in
+let test_watercaml_not_at_firecaml_door _ =
+  let p = Player.create Types.Watercaml { Vec2.x = 40.; y = 40. } in
   Physics.check_door door_level p;
-  assert_bool "watergirl not at fireboy door" (not p.at_door)
+  assert_bool "watercaml not at firecaml door" (not p.at_door)
 
 (* ── compute_ground_surface ─────────────────────────────────────── *)
 
@@ -167,7 +167,7 @@ let ice_floor_level = Level.parse [ "#.#"; "#I#"; "###" ]
 
 let test_ground_surface_ice _ =
   (* probe_y = 80 - 1 = 79 → row 1; col 1 = Ice *)
-  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 80. } in
+  let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 80. } in
   Physics.compute_ground_surface ice_floor_level p;
   assert_equal Player.Ice p.ground_surface
 
@@ -175,7 +175,7 @@ let test_ground_surface_ice _ =
 let conveyor_floor_level = Level.parse [ "#.#"; "#>#"; "###" ]
 
 let test_ground_surface_conveyor _ =
-  let p = Player.create Types.Fireboy { Vec2.x = 40.; y = 80. } in
+  let p = Player.create Types.Firecaml { Vec2.x = 40.; y = 80. } in
   Physics.compute_ground_surface conveyor_floor_level p;
   assert_equal (Player.Conveyor_belt Tuning.conveyor_speed) p.ground_surface
 
@@ -202,7 +202,7 @@ let test_crate_stops_at_floor _ =
 let test_player_blocked_by_wall _ =
   let lvl = Level.parse [ "#.#" ] in
   (* player at x=20 moving right into wall at col 2 *)
-  let p = Player.create Types.Fireboy { Vec2.x = 20.; y = 0. } in
+  let p = Player.create Types.Firecaml { Vec2.x = 20.; y = 0. } in
   p.vel <- { Vec2.x = 100.; y = 0. };
   Physics.move_player lvl [] [] p;
   assert_bool "player stopped by wall" (p.vel.x = 0.)
@@ -211,20 +211,20 @@ let suite =
   "Physics tests"
   >::: [
          "is_solid" >:: test_is_solid;
-         "is_deadly_fireboy" >:: test_is_deadly_fireboy;
-         "is_deadly_watergirl" >:: test_is_deadly_watergirl;
+         "is_deadly_firecaml" >:: test_is_deadly_firecaml;
+         "is_deadly_watercaml" >:: test_is_deadly_watercaml;
          "overlapping_tiles" >:: test_overlapping_tiles;
          "short_hop_vs_high_jump" >:: test_short_hop_vs_high_jump;
          "coyote_jump_after_walking_off" >:: test_coyote_jump_after_walking_off;
          "buffered_jump_while_falling" >:: test_buffered_jump_while_falling;
          "slope_surface_height" >:: test_slope_surface_height;
          "slope_snap_on_move" >:: test_slope_snap_on_move;
-         "hazard_kills_watergirl_on_fire" >:: test_hazard_kills_watergirl_on_fire;
-         "hazard_fireboy_safe_on_fire" >:: test_hazard_fireboy_safe_on_fire;
-         "hazard_kills_fireboy_on_water" >:: test_hazard_kills_fireboy_on_water;
+         "hazard_kills_watercaml_on_fire" >:: test_hazard_kills_watercaml_on_fire;
+         "hazard_firecaml_safe_on_fire" >:: test_hazard_firecaml_safe_on_fire;
+         "hazard_kills_firecaml_on_water" >:: test_hazard_kills_firecaml_on_water;
          "hazard_goo_kills_anyone" >:: test_hazard_goo_kills_anyone;
-         "fireboy_at_correct_door" >:: test_fireboy_at_correct_door;
-         "watergirl_not_at_fireboy_door" >:: test_watergirl_not_at_fireboy_door;
+         "firecaml_at_correct_door" >:: test_firecaml_at_correct_door;
+         "watercaml_not_at_firecaml_door" >:: test_watercaml_not_at_firecaml_door;
          "ground_surface_ice" >:: test_ground_surface_ice;
          "ground_surface_conveyor" >:: test_ground_surface_conveyor;
          "crate_falls_under_gravity" >:: test_crate_falls_under_gravity;

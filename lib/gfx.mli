@@ -33,6 +33,8 @@ val clear : color -> unit
 val draw_rect : x:int -> y:int -> w:int -> h:int -> color -> unit
 val draw_rect_lines : x:int -> y:int -> w:int -> h:int -> color -> unit
 val draw_circle : cx:int -> cy:int -> radius:float -> color -> unit
+val draw_line :
+  x1:int -> y1:int -> x2:int -> y2:int -> thickness:float -> color -> unit
 val draw_poly :
   cx:int ->
   cy:int ->
@@ -50,6 +52,26 @@ type texture
 val load_texture : string -> texture
 val unload_texture : texture -> unit
 val draw_texture : texture -> x:int -> y:int -> color -> unit
+
+val texture_width : texture -> int
+val texture_height : texture -> int
+
+(** Draw [texture]'s sub-rectangle [(src_x, src_y, src_w, src_h)] into the
+    destination rectangle [(dst_x, dst_y, dst_w, dst_h)] on screen, tinted
+    by [color]. Use this when you need to scale an image to a specific
+    size. *)
+val draw_texture_pro :
+  texture ->
+  src_x:int ->
+  src_y:int ->
+  src_w:int ->
+  src_h:int ->
+  dst_x:int ->
+  dst_y:int ->
+  dst_w:int ->
+  dst_h:int ->
+  color ->
+  unit
 
 (** {1 Input}
 

@@ -7,14 +7,14 @@ type player_input = {
 }
 
 type t = {
-  fireboy : player_input;
-  watergirl : player_input;
+  firecaml : player_input;
+  watercaml : player_input;
   reset : bool;
   debug_toggle : bool;      (** F3 — toggles signal debug overlay *)
 }
 
 let poll () =
-  let fireboy =
+  let firecaml =
     {
       left = Gfx.is_key_down Gfx.key_a;
       right = Gfx.is_key_down Gfx.key_d;
@@ -23,7 +23,7 @@ let poll () =
       interact_pressed = Gfx.is_key_pressed Gfx.key_e;
     }
   in
-  let watergirl =
+  let watercaml =
     {
       left = Gfx.is_key_down Gfx.key_j;
       right = Gfx.is_key_down Gfx.key_l;
@@ -34,4 +34,4 @@ let poll () =
   in
   let reset = Gfx.is_key_pressed Gfx.key_r in
   let debug_toggle = Gfx.is_key_pressed Gfx.key_f3 in
-  { fireboy; watergirl; reset; debug_toggle }
+  { firecaml; watercaml; reset; debug_toggle }

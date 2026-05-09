@@ -7,16 +7,48 @@ let color_wall = Gfx.rgb 100 100 100
 let color_fire = Gfx.rgb 255 100 0
 let color_water = Gfx.rgb 0 100 255
 let color_goo = Gfx.rgb 100 180 100
-let color_fireboy_door = Gfx.rgb 180 80 60
-let color_watergirl_door = Gfx.rgb 60 80 180
+let color_firecaml_door = Gfx.rgb 180 80 60
+let color_watercaml_door = Gfx.rgb 60 80 180
 let color_spikes = Gfx.rgb 80 80 80
 let color_ice = Gfx.rgb 200 230 255
 let color_conveyor = Gfx.rgb 120 120 120
-let color_fireboy = Gfx.rgb 255 120 60
-let color_watergirl = Gfx.rgb 60 120 255
+let color_conveyor_chevron = Gfx.rgb 230 230 230
+let color_firecaml = Gfx.rgb 255 120 60
+let color_watercaml = Gfx.rgb 60 120 255
 let color_dead = Gfx.rgb 100 100 100
 let color_diamond_red = Gfx.rgb 255 60 60
 let color_diamond_blue = Gfx.rgb 60 60 255
+
+(** A loaded sprite with the source-rect crop of its non-transparent
+    pixels — letting [draw_player] anchor the camel's feet to the bbox
+    floor instead of the padded-image floor. *)
+type sprite = {
+  tex : Gfx.texture;
+  src_x : int;
+  src_y : int;
+  src_w : int;
+  src_h : int;
+}
+
+(* Player sprites — loaded once after the GL context exists. The src
+   bboxes were measured by reading the PNG alpha channels; both source
+   images face LEFT, so a right-facing draw flips horizontally. *)
+let firecaml_sprite : sprite option ref = ref None
+let watercaml_sprite : sprite option ref = ref None
+
+let load_textures () =
+  let red =
+    Gfx.load_texture
+      "data/A-red-camel-pixel-art-for-a-fire-camel-water-camel-game-removebg-preview.png"
+  in
+  let blue =
+    Gfx.load_texture
+      "data/A-blue-camel-pixel-art-for-a-fire-camel-water-camel-game-removebg-preview.png"
+  in
+  firecaml_sprite :=
+    Some { tex = red; src_x = 8; src_y = 13; src_w = 86; src_h = 73 };
+  watercaml_sprite :=
+    Some { tex = blue; src_x = 4; src_y = 10; src_w = 63; src_h = 49 }
 
 (* Entity colours *)
 let color_button_up = Gfx.rgb 160 120 60
@@ -42,12 +74,31 @@ let tile_color tile =
   | Types.Fire -> Some color_fire
   | Types.Water -> Some color_water
   | Types.Goo -> Some color_goo
-  | Types.Fireboy_door -> Some color_fireboy_door
-  | Types.Watergirl_door -> Some color_watergirl_door
+  | Types.Firecaml_door -> Some color_firecaml_door
+  | Types.Watercaml_door -> Some color_watercaml_door
   | Types.Spikes -> Some color_spikes
   | Types.Ice -> Some color_ice
   | Types.Conveyor_left | Types.Conveyor_right -> Some color_conveyor
   | Types.Slope_up | Types.Slope_down -> Some color_wall
+
+(** Draw three chevrons across a conveyor tile pointing in [dir]
+    (1 = right, -1 = left). [(x, y)] is the screen-space top-left of the
+    tile. *)
+let draw_conveyor_chevrons ~x ~y ~dir =
+  let ts = Tuning.tile_size in
+  let mid = y + (ts / 2) in
+  let chev_w = 8 in
+  let chev_h = 6 in
+  let xs = [ x + 5; x + 16; x + 27 ] in
+  List.iter
+    (fun cx ->
+      let tip_x = if dir = 1 then cx + chev_w else cx in
+      let back_x = if dir = 1 then cx else cx + chev_w in
+      Gfx.draw_line ~x1:back_x ~y1:(mid - chev_h) ~x2:tip_x ~y2:mid
+        ~thickness:2. color_conveyor_chevron;
+      Gfx.draw_line ~x1:tip_x ~y1:mid ~x2:back_x ~y2:(mid + chev_h)
+        ~thickness:2. color_conveyor_chevron)
+    xs
 
 let draw_tiles level =
   let ts = Tuning.tile_size in
@@ -59,22 +110,51 @@ let draw_tiles level =
       | Some c ->
           let x = col * ts in
           let y = world_to_screen_y (float_of_int (row * ts)) ts in
-          Gfx.draw_rect ~x ~y ~w:ts ~h:ts c
+          Gfx.draw_rect ~x ~y ~w:ts ~h:ts c;
+          (match tile with
+           | Types.Conveyor_right -> draw_conveyor_chevrons ~x ~y ~dir:1
+           | Types.Conveyor_left -> draw_conveyor_chevrons ~x ~y ~dir:(-1)
+           | _ -> ())
     done
   done
 
 let draw_player (p : Player.t) =
   let (x, y, w, h) = Player.bbox p in
   let screen_y = world_to_screen_y y (int_of_float h) in
-  let color =
-    if not p.alive then color_dead
-    else
-      match p.kind with
-      | Types.Fireboy -> color_fireboy
-      | Types.Watergirl -> color_watergirl
+  let sprite_opt =
+    match p.kind with
+    | Types.Firecaml -> !firecaml_sprite
+    | Types.Watercaml -> !watercaml_sprite
   in
-  Gfx.draw_rect ~x:(int_of_float x) ~y:screen_y ~w:(int_of_float w)
-    ~h:(int_of_float h) color
+  match sprite_opt with
+  | Some s ->
+      let tint = if p.alive then Gfx.white else Gfx.rgb 120 120 120 in
+      (* Preserve aspect ratio: scale to bbox height, width follows. *)
+      let bbox_h = int_of_float h in
+      let bbox_w = int_of_float w in
+      let aspect = float_of_int s.src_w /. float_of_int s.src_h in
+      let dst_h = bbox_h in
+      let dst_w = int_of_float (float_of_int dst_h *. aspect) in
+      let dst_x = int_of_float x + ((bbox_w - dst_w) / 2) in
+      let dst_y = screen_y in
+      (* Sources face LEFT; flip via negative src_w when facing right. *)
+      let src_w_signed =
+        match p.facing with
+        | Types.Left -> s.src_w
+        | Types.Right -> -s.src_w
+      in
+      Gfx.draw_texture_pro s.tex ~src_x:s.src_x ~src_y:s.src_y
+        ~src_w:src_w_signed ~src_h:s.src_h ~dst_x ~dst_y ~dst_w ~dst_h tint
+  | None ->
+      let color =
+        if not p.alive then color_dead
+        else
+          match p.kind with
+          | Types.Firecaml -> color_firecaml
+          | Types.Watercaml -> color_watercaml
+      in
+      Gfx.draw_rect ~x:(int_of_float x) ~y:screen_y ~w:(int_of_float w)
+        ~h:(int_of_float h) color
 
 let draw_diamond (d : Diamond.t) =
   if d.collected then ()
@@ -84,8 +164,8 @@ let draw_diamond (d : Diamond.t) =
     in
     let color =
       match d.kind with
-      | Types.Fireboy -> color_diamond_red
-      | Types.Watergirl -> color_diamond_blue
+      | Types.Firecaml -> color_diamond_red
+      | Types.Watercaml -> color_diamond_blue
     in
     Gfx.draw_poly ~cx:(int_of_float d.pos.x) ~cy:screen_y ~sides:4
       ~radius:(Diamond.size /. 2.) ~rotation:45. color
@@ -226,8 +306,8 @@ let draw game =
   Array.iter draw_crate game.Game.crates;
   (* Collectibles and characters *)
   Array.iter draw_diamond game.Game.diamonds;
-  draw_player game.Game.fireboy;
-  draw_player game.Game.watergirl;
+  draw_player game.Game.firecaml;
+  draw_player game.Game.watercaml;
   Hud.draw game;
   if game.Game.status = Types.Won then draw_win_banner ();
   if game.Game.debug then draw_debug game

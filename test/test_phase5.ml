@@ -11,21 +11,21 @@ let approx a b = abs_float (a -. b) < 0.0001
 (* ── Surface-driven movement (Steps 25–26) ──────────────────────────────── *)
 
 let test_normal_no_input_zeroes_vel _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.vel <- { Vec2.x = 5.0; y = 0. };
   p.ground_surface <- Player.Normal;
   Player.apply_input p no_input;
   assert_bool "normal zeros vx" (approx p.vel.x 0.)
 
 let test_ice_no_input_decays _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.vel <- { Vec2.x = 5.0; y = 0. };
   p.ground_surface <- Player.Ice;
   Player.apply_input p no_input;
   assert_bool "ice decays vx" (approx p.vel.x (5.0 *. Tuning.ice_friction))
 
 let test_ice_keeps_decaying _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.vel <- { Vec2.x = 5.0; y = 0. };
   p.ground_surface <- Player.Ice;
   for _ = 1 to 5 do Player.apply_input p no_input done;
@@ -33,14 +33,14 @@ let test_ice_keeps_decaying _ =
   assert_bool "ice decays across frames" (approx p.vel.x expected)
 
 let test_conveyor_no_input_uses_belt _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.ground_surface <- Player.Conveyor_belt Tuning.conveyor_speed;
   Player.apply_input p no_input;
   assert_bool "conveyor carries at belt speed"
     (approx p.vel.x Tuning.conveyor_speed)
 
 let test_conveyor_with_input_is_additive _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.ground_surface <- Player.Conveyor_belt Tuning.conveyor_speed;
   Player.apply_input p input_left;
   let expected = -. Tuning.walk_speed +. Tuning.conveyor_speed in
@@ -49,7 +49,7 @@ let test_conveyor_with_input_is_additive _ =
 (* ── Fans (Step 27) ─────────────────────────────────────────────────────── *)
 
 let test_fan_lifts_player _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.in_fan <- true;
   p.vel <- Vec2.zero;
   Player.apply_gravity p;
@@ -57,14 +57,14 @@ let test_fan_lifts_player _ =
   assert_bool "fan under max" (p.vel.y <= Tuning.fan_max_up_vy)
 
 let test_fan_caps_upward_velocity _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.in_fan <- true;
   p.vel <- { Vec2.x = 0.; y = Tuning.fan_max_up_vy };
   Player.apply_gravity p;
   assert_bool "fan cap" (approx p.vel.y Tuning.fan_max_up_vy)
 
 let test_no_fan_applies_gravity _ =
-  let p = Player.create Types.Fireboy Vec2.zero in
+  let p = Player.create Types.Firecaml Vec2.zero in
   p.in_fan <- false;
   p.vel <- Vec2.zero;
   Player.apply_gravity p;
@@ -114,7 +114,7 @@ let test_teleporter_relocates_player _ =
   let ts = float_of_int Tuning.tile_size in
   (* Place player's center inside tile A *)
   let p =
-    Player.create Types.Fireboy
+    Player.create Types.Firecaml
       { Vec2.x = (2. *. ts) +. (ts /. 2.); y = ts +. 2. }
   in
   Entities.update_teleporter tp [ p ];
@@ -128,7 +128,7 @@ let test_teleporter_cooldown_prevents_retrigger _ =
   in
   let ts = float_of_int Tuning.tile_size in
   let p =
-    Player.create Types.Fireboy
+    Player.create Types.Firecaml
       { Vec2.x = (2. *. ts) +. (ts /. 2.); y = ts +. 2. }
   in
   Entities.update_teleporter tp [ p ];
@@ -144,7 +144,7 @@ let test_teleporter_cooldown_ticks_down _ =
   in
   let ts = float_of_int Tuning.tile_size in
   let p =
-    Player.create Types.Fireboy
+    Player.create Types.Firecaml
       { Vec2.x = (2. *. ts) +. (ts /. 2.); y = ts +. 2. }
   in
   Entities.update_teleporter tp [ p ];

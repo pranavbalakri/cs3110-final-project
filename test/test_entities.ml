@@ -9,7 +9,7 @@ let ts = float_of_int Tuning.tile_size
 let make_signals () = Signals.create ()
 
 let player_at x y =
-  Player.create Types.Fireboy { Vec2.x; y }
+  Player.create Types.Firecaml { Vec2.x; y }
 
 let dead_player_at x y =
   let p = player_at x y in

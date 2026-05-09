@@ -44,8 +44,8 @@ type level_data = {
   width : int;
   height : int;
   grid : Types.tile array array;
-  fireboy_spawn : Vec2.t;
-  watergirl_spawn : Vec2.t;
+  firecaml_spawn : Vec2.t;
+  watercaml_spawn : Vec2.t;
   diamonds : diamond_spec list;
   buttons : button_spec list;
   levers : lever_spec list;
@@ -62,8 +62,8 @@ let char_to_tile = function
   | 'F' -> Types.Fire
   | 'W' -> Types.Water
   | 'G' -> Types.Goo
-  | 'r' -> Types.Fireboy_door
-  | 'b' -> Types.Watergirl_door
+  | 'r' -> Types.Firecaml_door
+  | 'b' -> Types.Watercaml_door
   | '^' -> Types.Spikes
   | 'I' -> Types.Ice
   | '<' -> Types.Conveyor_left
@@ -85,8 +85,8 @@ let parse
     List.fold_left (fun acc s -> max acc (String.length s)) 0 lines
   in
   let grid = Array.make_matrix height width Types.Empty in
-  let fireboy_spawn = ref Vec2.zero in
-  let watergirl_spawn = ref Vec2.zero in
+  let firecaml_spawn = ref Vec2.zero in
+  let watercaml_spawn = ref Vec2.zero in
   let diamonds = ref [] in
   let buttons = ref [] in
   let levers = ref [] in
@@ -100,10 +100,10 @@ let parse
           let spawn_x = (float_of_int col *. tile_size) +. (tile_size /. 2.) in
           let spawn_y = float_of_int row *. tile_size in
           match c with
-          | 'f' -> fireboy_spawn := { Vec2.x = spawn_x; y = spawn_y }
-          | 'w' -> watergirl_spawn := { Vec2.x = spawn_x; y = spawn_y }
-          | 'R' -> diamonds := { kind = Types.Fireboy; col; row } :: !diamonds
-          | 'B' -> diamonds := { kind = Types.Watergirl; col; row } :: !diamonds
+          | 'f' -> firecaml_spawn := { Vec2.x = spawn_x; y = spawn_y }
+          | 'w' -> watercaml_spawn := { Vec2.x = spawn_x; y = spawn_y }
+          | 'R' -> diamonds := { kind = Types.Firecaml; col; row } :: !diamonds
+          | 'B' -> diamonds := { kind = Types.Watercaml; col; row } :: !diamonds
           | 'p' ->
               let id = Printf.sprintf "P_%d_%d" col row in
               buttons := ({ id; col; row } : button_spec) :: !buttons
@@ -118,8 +118,8 @@ let parse
     width;
     height;
     grid;
-    fireboy_spawn = !fireboy_spawn;
-    watergirl_spawn = !watergirl_spawn;
+    firecaml_spawn = !firecaml_spawn;
+    watercaml_spawn = !watercaml_spawn;
     diamonds = List.rev !diamonds;
     buttons = List.rev !buttons;
     levers = List.rev !levers;
@@ -198,7 +198,7 @@ let entities_level =
 (* ── Default showcase level — every tile + every overlay entity ──
    Tile legend (see [char_to_tile]):
      # wall        F fire         W water        G goo
-     r fireboy-door  b watergirl-door
+     r firecaml-door  b watercaml-door
      ^ spikes      I ice          < / > conveyors     / \ slopes
      f / w spawns  R / B diamonds
      V lever       p button       C pushable crate

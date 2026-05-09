@@ -1,8 +1,9 @@
 open Fwg
 
 let () =
-  Gfx.init ~width:800 ~height:600 ~title:"Fireboy & Watergirl";
+  Gfx.init ~width:800 ~height:600 ~title:"Firecaml & Watercaml";
   Gfx.set_target_fps 60;
+  Render.load_textures ();
   let menu = Menu.create () in
   let game : Game.t option ref = ref None in
   while not (Gfx.should_close ()) do

@@ -1,7 +1,7 @@
 type t = {
   level : Level.level_data;
-  fireboy : Player.t;
-  watergirl : Player.t;
+  firecaml : Player.t;
+  watercaml : Player.t;
   diamonds : Diamond.t array;
   buttons : Entities.button array;
   levers : Entities.lever array;
@@ -18,8 +18,8 @@ type t = {
 }
 
 let init level =
-  let fireboy = Player.create Types.Fireboy level.Level.fireboy_spawn in
-  let watergirl = Player.create Types.Watergirl level.Level.watergirl_spawn in
+  let firecaml = Player.create Types.Firecaml level.Level.firecaml_spawn in
+  let watercaml = Player.create Types.Watercaml level.Level.watercaml_spawn in
   let diamonds =
     Array.of_list (List.map Diamond.from_spec level.Level.diamonds)
   in
@@ -46,8 +46,8 @@ let init level =
   in
   {
     level;
-    fireboy;
-    watergirl;
+    firecaml;
+    watercaml;
     diamonds;
     buttons;
     levers;
@@ -64,8 +64,8 @@ let init level =
   }
 
 let reset game =
-  Player.reset game.fireboy game.level.fireboy_spawn;
-  Player.reset game.watergirl game.level.watergirl_spawn;
+  Player.reset game.firecaml game.level.firecaml_spawn;
+  Player.reset game.watercaml game.level.watercaml_spawn;
   Array.iter Diamond.reset game.diamonds;
   Array.iter Entities.reset_lever game.levers;
   Array.iter Entities.reset_elevator game.elevators;
@@ -99,7 +99,7 @@ let update game (inp : Input.t) dt =
         Array.iter (fun e -> Entities.update_elevator e dt) game.elevators;
 
         (* 3. Emit button signals based on player + crate positions *)
-        let players = [ game.fireboy; game.watergirl ] in
+        let players = [ game.firecaml; game.watercaml ] in
         let crates_list = Array.to_list game.crates in
         Array.iter
           (fun b -> Entities.update_button b players crates_list game.signals)
@@ -108,8 +108,8 @@ let update game (inp : Input.t) dt =
         (* 4. Handle lever interact (edge-triggered, per-player key) *)
         let players_with_interact =
           [
-            (game.fireboy, inp.fireboy.interact_pressed);
-            (game.watergirl, inp.watergirl.interact_pressed);
+            (game.firecaml, inp.firecaml.interact_pressed);
+            (game.watercaml, inp.watercaml.interact_pressed);
           ]
         in
         Array.iter
@@ -140,23 +140,23 @@ let update game (inp : Input.t) dt =
         List.iter (Entities.apply_elevator_riding game.elevators) players;
 
         (* 9. Compute ground surface for each player (feeds apply_input) *)
-        Physics.compute_ground_surface game.level game.fireboy;
-        Physics.compute_ground_surface game.level game.watergirl;
+        Physics.compute_ground_surface game.level game.firecaml;
+        Physics.compute_ground_surface game.level game.watercaml;
 
         (* 10. Fan membership: reset, then flag for each active fan *)
-        game.fireboy.in_fan <- false;
-        game.watergirl.in_fan <- false;
+        game.firecaml.in_fan <- false;
+        game.watercaml.in_fan <- false;
         Array.iter
           (fun f ->
-            Entities.apply_fan_to_player f game.fireboy;
-            Entities.apply_fan_to_player f game.watergirl)
+            Entities.apply_fan_to_player f game.firecaml;
+            Entities.apply_fan_to_player f game.watercaml)
           game.fans;
 
         (* 11. Apply player input and gravity (gravity knows about in_fan) *)
-        Player.apply_input game.fireboy inp.fireboy;
-        Player.apply_input game.watergirl inp.watergirl;
-        Player.apply_gravity game.fireboy;
-        Player.apply_gravity game.watergirl;
+        Player.apply_input game.firecaml inp.firecaml;
+        Player.apply_input game.watercaml inp.watercaml;
+        Player.apply_gravity game.firecaml;
+        Player.apply_gravity game.watercaml;
 
         (* 12. Move crates first (vertical only; horizontal is push-driven) *)
         let crates_list = Array.to_list game.crates in
@@ -166,8 +166,8 @@ let update game (inp : Input.t) dt =
 
         (* 13. Sweep-based player movement with tile + entity + crate collision *)
         let crates_list = Array.to_list game.crates in
-        Physics.move_player game.level extra_solid crates_list game.fireboy;
-        Physics.move_player game.level extra_solid crates_list game.watergirl;
+        Physics.move_player game.level extra_solid crates_list game.firecaml;
+        Physics.move_player game.level extra_solid crates_list game.watercaml;
 
         (* 14. Teleporters (after movement, with per-player cooldown) *)
         Entities.tick_teleport_cooldowns players dt;
@@ -176,22 +176,22 @@ let update game (inp : Input.t) dt =
           game.teleporters;
 
         (* 15. Hazards, doors, diamonds *)
-        Physics.check_hazards game.level game.fireboy;
-        Physics.check_hazards game.level game.watergirl;
-        Physics.check_door game.level game.fireboy;
-        Physics.check_door game.level game.watergirl;
+        Physics.check_hazards game.level game.firecaml;
+        Physics.check_hazards game.level game.watercaml;
+        Physics.check_door game.level game.firecaml;
+        Physics.check_door game.level game.watercaml;
         Array.iter
           (fun d ->
-            Diamond.try_collect d game.fireboy;
-            Diamond.try_collect d game.watergirl)
+            Diamond.try_collect d game.firecaml;
+            Diamond.try_collect d game.watercaml)
           game.diamonds;
 
         (* 16. Win / lose *)
-        if (not game.fireboy.alive) || not game.watergirl.alive then begin
+        if (not game.firecaml.alive) || not game.watercaml.alive then begin
           game.status <- Types.Lost;
           game.death_timer <- 1.0
         end
-        else if game.fireboy.at_door && game.watergirl.at_door then
+        else if game.firecaml.at_door && game.watercaml.at_door then
           game.status <- Types.Won;
 
         game

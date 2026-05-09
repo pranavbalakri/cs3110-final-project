@@ -25,6 +25,12 @@ let draw_rect ~x ~y ~w ~h c = R.draw_rectangle x y w h c
 let draw_rect_lines ~x ~y ~w ~h c = R.draw_rectangle_lines x y w h c
 let draw_circle ~cx ~cy ~radius c = R.draw_circle cx cy radius c
 
+let draw_line ~x1 ~y1 ~x2 ~y2 ~thickness c =
+  R.draw_line_ex
+    (R.Vector2.create (float_of_int x1) (float_of_int y1))
+    (R.Vector2.create (float_of_int x2) (float_of_int y2))
+    thickness c
+
 let draw_poly ~cx ~cy ~sides ~radius ~rotation c =
   R.draw_poly (R.Vector2.create (float_of_int cx) (float_of_int cy))
     sides radius rotation c
@@ -36,6 +42,22 @@ type texture = R.Texture.t
 let load_texture path = R.load_texture path
 let unload_texture t = R.unload_texture t
 let draw_texture t ~x ~y c = R.draw_texture t x y c
+
+let texture_width t = R.Texture.width t
+let texture_height t = R.Texture.height t
+
+let draw_texture_pro t ~src_x ~src_y ~src_w ~src_h ~dst_x ~dst_y ~dst_w ~dst_h c
+    =
+  let src =
+    R.Rectangle.create (float_of_int src_x) (float_of_int src_y)
+      (float_of_int src_w) (float_of_int src_h)
+  in
+  let dst =
+    R.Rectangle.create (float_of_int dst_x) (float_of_int dst_y)
+      (float_of_int dst_w) (float_of_int dst_h)
+  in
+  let origin = R.Vector2.create 0. 0. in
+  R.draw_texture_pro t src dst origin 0. c
 
 type key = R.Key.t
 

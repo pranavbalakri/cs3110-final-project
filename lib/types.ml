@@ -4,8 +4,8 @@ type tile =
   | Fire
   | Water
   | Goo
-  | Fireboy_door
-  | Watergirl_door
+  | Firecaml_door
+  | Watercaml_door
   | Ice
   | Conveyor_left
   | Conveyor_right
@@ -14,8 +14,8 @@ type tile =
   | Slope_down
 
 type player_kind =
-  | Fireboy
-  | Watergirl
+  | Firecaml
+  | Watercaml
 
 type direction =
   | Left
