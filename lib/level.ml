@@ -253,24 +253,26 @@ let level1 =
       ]
     (String.split_on_char '\n' level1_str)
 
-(* ── Level 2: "Button Cooperation" — each player's button opens the other's
-   gate. A central elevator ferries them up to the door tier. ── *)
+(* ── Level 2: "Heart Climb" — Watergirl flips the ground lever to power the
+   left fan; Fireboy reaches the top-of-heart lever, which powers the right
+   fan and opens the center gate. The blocks below the gate are climbable from
+   the heart, so the finish reads like Level 1. ── *)
 
 let level2_str =
   {|####################
-#r................b#
-#.##............##.#
-#........##........#
-#..................#
-#......WWWWWW......#
+#b................r#
+##.##..........##.##
+#...####....####...#
+#..######..######..#
+#...############...#
+#....##########....#
+#.....########.....#
 #......######......#
-#........R.........#
-#......######......#
-#......FFFFFF......#
-#..................#
-#........B.........#
-#...##........##...#
-#.f.p............pw#
+#.......####.......#
+#........V.........#
+#....###....###....#
+#..##..........##..#
+#f...##....##.w.V..#
 ####################|}
 
 let level2 =
@@ -278,35 +280,22 @@ let level2 =
     ~gates:
       [
         {
-          listener_ids = [ "P_17_1" ];
-          col = 1;
-          row = 13;
-          w_tiles = 1;
-          h_tiles = 1;
-        };
-        {
-          listener_ids = [ "P_4_1" ];
-          col = 18;
-          row = 13;
-          w_tiles = 1;
-          h_tiles = 1;
+          listener_ids = [ "V_16_1"; "V_9_4" ];
+          col = 8;
+          row = 7;
+          w_tiles = 4;
+          h_tiles = 2;
         };
       ]
-    ~elevators:
+    ~fans:
       [
-        {
-          col_a = 9;
-          row_a = 1;
-          col_b = 9;
-          row_b = 6;
-          w_tiles = 2;
-          speed = 60.;
-        };
+        { col = 2; row = 1; height_tiles = 12; listener_ids = [ "V_16_1" ] };
+        { col = 17; row = 1; height_tiles = 12; listener_ids = [ "V_9_4" ] };
       ]
     (String.split_on_char '\n' level2_str)
-
-(* ── Level 3: "Lever & Teleport" — a lever toggles a fan that lifts the
-   players over the goo pit; a teleporter pair shortcuts the upper ledges. ── *)
+    
+(* ── Level 3: "Lever & Fan" — a lever toggles a fan that lifts the
+   players up to the goal ── *)
 
 let level3_str =
   {|####################
