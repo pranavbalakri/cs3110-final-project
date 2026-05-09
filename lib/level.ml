@@ -310,30 +310,34 @@ let level2 =
 
 let level3_str =
   {|####################
-#b................r#
-######........######
+#r................b#
+######.........#####
 #..................#
 #..................#
 #..................#
-#........R.........#
-#......######......#
-#........B.........#
+#..........R.......#
+#......IIIIII......#
 #..................#
+#......R.........B.#
+#....###...........#
 #..................#
-#..................#
-#..GGGGGGGGGGGGGG..#
-#.fV............w.#
+#....IIIIIIIIII....#
+#.Vf............w.##
 ####################|}
 
 let level3 =
   parse
     ~fans:
       [
-        { col = 9; row = 1; height_tiles = 11; listener_ids = [ "V_2_1" ] };
+        (* left fan: where Fire column was — flip lever to activate *)
+        { col = 6; row = 7; height_tiles = 5; listener_ids = [ "V_2_1" ] };
+        (* right fan: where Water column was — always on *)
+        { col = 14; row = 2; height_tiles = 10; listener_ids = [] };
       ]
     ~teleporters:
       [ { col_a = 2; row_a = 11; col_b = 17; row_b = 11 } ]
     (String.split_on_char '\n' level3_str)
+
 
 (** All playable levels in display order. The level-select menu indexes into
     this array by cursor position. *)
